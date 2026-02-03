@@ -1,15 +1,17 @@
 ---
 name: brainstorming
-description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+description: "Use before implementing features, building components, or modifying code behavior. Explores software design requirements, architecture, and technical constraints. For research hypothesis generation or experimental design, use scientific-brainstorming instead."
 ---
 
 # Brainstorming Ideas Into Designs
 
 ## Overview
 
-Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
+Help turn software ideas into fully formed designs and specs through natural collaborative dialogue.
 
 Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design in small sections (200-300 words), checking after each section whether it looks right so far.
+
+**Scope:** This skill focuses on **software engineering design** (features, components, architecture, technical implementation). For **scientific research ideation** (hypotheses, experiments, methodologies), use `scientific-brainstorming` instead.
 
 ## The Process
 
