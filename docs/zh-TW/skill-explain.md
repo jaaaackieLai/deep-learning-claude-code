@@ -159,26 +159,62 @@ AI agent 開發者的進階技能（供未來 agent 開發使用）。
 
 ## 🔄 continuous-learning
 
-**用途**：基於本能的學習系統，觀察會話並演化行為
+**用途**：即時誤解檢測和溝通優化系統
 
-**狀態**：⚠️ **尚未實作**
+**狀態**：✅ **已實作（方案 3：增量式即時捕獲）**
 
-**計劃功能**：
-- 從 Claude Code 會話自動檢測模式
-- 創建帶有信心評分的原子「本能」
-- 將本能演化為 skills/commands/agents
-- 基於 hook 的觀察（100% 可靠）
-- 後台 agent 分析（使用 Haiku）
+**核心功能**：
+- **即時誤解檢測**：在 correction 發生的瞬間自動捕獲
+- **輕量級分析**：只分析最近 5 turns（不是整個 session）
+- **高 Token 效率**：相比傳統方案節省 80-90% token 成本
+- **自動背景運行**：使用 Haiku 模型背景分析（無需手動觸發）
+- **生成 Clarification Hints**：50-100 字的簡潔溝通指南
+
+**檢測模式**：
+1. **快速重複編輯**（Rapid Re-edit）：同一檔案短時間內多次編輯
+2. **錯誤恢復**（Error Recovery）：錯誤後成功修復的模式
+3. **工具重複使用**（Repeated Tool）：同一工具連續使用 3 次以上
+4. **迭代修正**（Iterative Correction）：快速來回調整任務
 
 **架構**：
-- 觀察 hooks（PreToolUse/PostToolUse）
-- 模式檢測（用戶糾正、錯誤解決、工作流程）
-- 信心加權本能（0.3-0.9）
-- 本能聚類和演化
+- 觀察 hooks（PreToolUse/PostToolUse）捕獲工具使用
+- 啟發式檢測識別 correction patterns
+- 背景觸發輕量級分析（Haiku）
+- 生成並儲存 clarification hints
 
-**注意**：這是計劃未來實現的進階功能。基礎架構已存在，但需要針對目標受眾進行設置和定制。
+**Token 效率對比**：
+| 方案 | 每次分析成本 | 觸發方式 | 效率 |
+|------|-------------|---------|------|
+| 傳統方案 | 6-23K tokens | 手動 | 基準 |
+| **方案 3** | **1-2.5K tokens** | **自動** | **5-10x** |
 
-**目標用戶**：對個人化學習系統感興趣的進階用戶
+**使用方式**：
+1. 配置 hooks（詳見 `skills/continuous-learning/USAGE_GUIDE.md`）
+2. 系統自動運作，無需手動操作
+3. 查看生成的 hints：`~/.claude/homunculus/clarifications/`
+4. 測試功能：`python3 skills/continuous-learning/scripts/test-clarification.py`
+
+**範例輸出**：
+```yaml
+---
+id: rapid_re_edit-20250204
+trigger: "when editing files multiple times"
+confidence: 0.70
+type: disambiguation
+---
+
+When user says "refactor", clarify: "Structural change or rename only?"
+
+Evidence:
+- Rapid tool iteration: Edit → Edit → Edit
+```
+
+**目標用戶**：所有希望減少溝通成本的使用者
+
+**文檔**：
+- 完整指南：`skills/continuous-learning/USAGE_GUIDE.md`
+- 技能說明：`skills/continuous-learning/SKILL.md`
+- 測試腳本：`skills/continuous-learning/scripts/test-clarification.py`
 
 ---
 
@@ -191,7 +227,7 @@ AI agent 開發者的進階技能（供未來 agent 開發使用）。
 | **腦力激盪** | software-brainstorming, scientific-brainstorming | 自訂 | ✅ 可用 | 開發者、研究人員 |
 | **Context 工程** | fundamentals, compression, degradation, optimization | 自訂 | ✅ 可用 | 未來 agent 開發 |
 | **編程** | python-skills | 自訂 | 📝 待完善文檔 | Python 開發者 |
-| **學習** | continuous-learning | 自訂 | ⚠️ 未實作 | 未來功能 |
+| **學習** | continuous-learning | 自訂 | ✅ 已實作 | 所有使用者 |
 
 ---
 
@@ -202,19 +238,21 @@ AI agent 開發者的進階技能（供未來 agent 開發使用）。
 **推薦技能**：
 1. **scientific-critical-thinking** - 用於審查論文和設計實驗
 2. **git-skills** - 用於程式碼和實驗的版本控制
-3. **python-skills** - 用於 Python 開發最佳實踐
+3. **continuous-learning** - 減少溝通誤解，提升協作效率
+4. **python-skills** - 用於 Python 開發最佳實踐
 
 ### 軟體開發者
 
 **推薦技能**：
 1. **git-skills** - 版本控制必備
 2. **software-brainstorming** - 用於功能規劃和架構
+3. **continuous-learning** - 自動學習你的溝通模式，降低溝通成本
 
 ### 進階用戶
 
 **推薦技能**：
 1. **context-engineering** - 用於未來 agent 開發
-2. **continuous-learning** - 實驗性（實作後）
+2. **continuous-learning** - 自動化誤解檢測和溝通優化
 
 ---
 

@@ -34,6 +34,19 @@
     "evolved_path": "~/.claude/homunculus/evolved/",
     "auto_evolve": false
   },
+  "clarifications": {
+    "enabled": true,
+    "clarifications_path": "~/.claude/homunculus/clarifications/",
+    "min_confidence": 0.5,
+    "detection_patterns": [
+      "rapid_re_edit",
+      "error_then_success",
+      "repeated_tool",
+      "iterative_correction"
+    ],
+    "analysis_model": "haiku",
+    "max_clarifications": 50
+  },
   "integration": {
     "skill_creator_api": "https://skill-creator.app/api",
     "backward_compatible_v1": true

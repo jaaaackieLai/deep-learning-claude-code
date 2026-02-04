@@ -1,0 +1,152 @@
+{
+  "name": "deep-learning-claude-code",
+  "owner": {
+    "name": "jackie"
+  },
+  "metadata": {
+    "description": "Commands, agents, hooks, and skills for Python-based deep learning research workflows",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "dl-research-toolkit",
+      "source": ".",
+      "description": "Comprehensive toolkit for deep learning researchers using Python, including TDD guides, code review agents, and specialized skills for PyTorch, scientific computing, and context engineering",
+      "version": "1.0.0",
+      "author": {
+        "name": "jackie"
+      },
+      "license": "MIT",
+      "keywords": [
+        "deep-learning",
+        "python",
+        "pytorch",
+        "research",
+        "tdd",
+        "code-review",
+        "scientific-computing"
+      ],
+      "category": "productivity",
+      "agents": [
+        "./agents/architect.md",
+        "./agents/code-reviewer.md",
+        "./agents/doc-updater.md",
+        "./agents/planner.md",
+        "./agents/tdd-guide.md"
+      ],
+      "commands": [
+        "./commands/plan.md",
+        "./commands/tdd.md",
+        "./commands/test-coverage.md",
+        "./commands/update-codemaps.md",
+        "./commands/update-docs.md"
+      ],
+      "strict": false
+    },
+    {
+      "name": "context-engineering-skills",
+      "source": "./skills/context-engineering",
+      "description": "Advanced context engineering skills for optimizing context windows, compression, degradation management, and fundamentals",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "context-engineering",
+        "optimization",
+        "compression"
+      ],
+      "strict": false
+    },
+    {
+      "name": "python-ml-skills",
+      "source": "./skills/python-skills",
+      "description": "Python library skills for ML/DL research: PyTorch, PyTorch Lightning, scikit-learn, matplotlib, seaborn, networkx, torch-geometric, and more",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": [
+        "python",
+        "pytorch",
+        "machine-learning",
+        "visualization",
+        "testing"
+      ],
+      "strict": false
+    },
+    {
+      "name": "brainstorming-skills",
+      "source": "./skills/brainstorming",
+      "description": "Software and scientific brainstorming skills for exploring ideas, requirements, and design approaches",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "brainstorming",
+        "planning",
+        "design"
+      ],
+      "strict": false
+    },
+    {
+      "name": "git-workflow-skills",
+      "source": "./skills/git-skills",
+      "description": "Git workflow and version control skills for research projects",
+      "version": "1.0.0",
+      "category": "development",
+      "keywords": [
+        "git",
+        "version-control",
+        "workflow"
+      ],
+      "strict": false
+    },
+    {
+      "name": "scientific-thinking-skill",
+      "source": "./skills/scientific-critical-thinking",
+      "description": "Scientific critical thinking methodology for systematic evaluation and decision-making",
+      "version": "1.0.0",
+      "category": "productivity",
+      "keywords": [
+        "critical-thinking",
+        "scientific-method",
+        "evaluation"
+      ],
+      "strict": false
+    },
+    {
+      "name": "continuous-learning-skill",
+      "source": "./skills/continuous-learning",
+      "description": "Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents",
+      "version": "2.0.0",
+      "category": "productivity",
+      "keywords": [
+        "learning",
+        "instincts",
+        "hooks",
+        "evolution"
+      ],
+      "hooks": {
+        "PreToolUse": [
+          {
+            "matcher": ".*",
+            "hooks": [
+              {
+                "type": "command",
+                "command": "${CLAUDE_PLUGIN_ROOT}/hooks/observe.sh pre ${CLAUDE_TOOL_NAME}"
+              }
+            ]
+          }
+        ],
+        "PostToolUse": [
+          {
+            "matcher": ".*",
+            "hooks": [
+              {
+                "type": "command",
+                "command": "${CLAUDE_PLUGIN_ROOT}/hooks/observe.sh post ${CLAUDE_TOOL_NAME}"
+              }
+            ]
+          }
+        ]
+      },
+      "strict": false
+    }
+  ]
+}

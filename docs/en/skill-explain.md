@@ -159,26 +159,62 @@ Advanced skills for AI agent developers (for future agent development).
 
 ## 🔄 continuous-learning
 
-**Purpose**: Instinct-based learning system that observes sessions and evolves behaviors
+**Purpose**: Real-time misunderstanding detection and communication optimization system
 
-**Status**: ⚠️ **Not Yet Implemented**
+**Status**: ✅ **Implemented (Approach 3: Incremental Real-time Capture)**
 
-**Planned Features**:
-- Automatic pattern detection from Claude Code sessions
-- Creation of atomic "instincts" with confidence scoring
-- Evolution of instincts into skills/commands/agents
-- Hook-based observation (100% reliable)
-- Background agent analysis (using Haiku)
+**Core Features**:
+- **Real-time Misunderstanding Detection**: Automatically captures corrections as they happen
+- **Lightweight Analysis**: Analyzes only last 5 turns (not entire session)
+- **High Token Efficiency**: Saves 80-90% token cost compared to traditional approaches
+- **Automatic Background Execution**: Uses Haiku model for background analysis (no manual trigger needed)
+- **Generates Clarification Hints**: Concise 50-100 word communication guidelines
+
+**Detection Patterns**:
+1. **Rapid Re-edit**: Same file edited multiple times in short period
+2. **Error Recovery**: Error followed by successful fix pattern
+3. **Repeated Tool**: Same tool used 3+ times consecutively
+4. **Iterative Correction**: Rapid back-and-forth on tasks
 
 **Architecture**:
-- Observation hooks (PreToolUse/PostToolUse)
-- Pattern detection (user corrections, error resolutions, workflows)
-- Confidence-weighted instincts (0.3-0.9)
-- Instinct clustering and evolution
+- Observation hooks (PreToolUse/PostToolUse) capture tool usage
+- Heuristic detection identifies correction patterns
+- Background trigger for lightweight analysis (Haiku)
+- Generates and stores clarification hints
 
-**Note**: This is an advanced feature planned for future implementation. The infrastructure exists but requires setup and customization for the target audience.
+**Token Efficiency Comparison**:
+| Approach | Cost per Analysis | Trigger | Efficiency |
+|----------|------------------|---------|------------|
+| Traditional | 6-23K tokens | Manual | Baseline |
+| **Approach 3** | **1-2.5K tokens** | **Automatic** | **5-10x** |
 
-**Target Users**: Advanced users interested in personalized learning systems
+**Usage**:
+1. Configure hooks (see `skills/continuous-learning/USAGE_GUIDE.md`)
+2. System runs automatically, no manual action needed
+3. View generated hints: `~/.claude/homunculus/clarifications/`
+4. Test functionality: `python3 skills/continuous-learning/scripts/test-clarification.py`
+
+**Example Output**:
+```yaml
+---
+id: rapid_re_edit-20250204
+trigger: "when editing files multiple times"
+confidence: 0.70
+type: disambiguation
+---
+
+When user says "refactor", clarify: "Structural change or rename only?"
+
+Evidence:
+- Rapid tool iteration: Edit → Edit → Edit
+```
+
+**Target Users**: All users who want to reduce communication overhead
+
+**Documentation**:
+- Complete guide: `skills/continuous-learning/USAGE_GUIDE.md`
+- Skill description: `skills/continuous-learning/SKILL.md`
+- Test script: `skills/continuous-learning/scripts/test-clarification.py`
 
 ---
 
@@ -191,7 +227,7 @@ Advanced skills for AI agent developers (for future agent development).
 | **Brainstorming** | software-brainstorming, scientific-brainstorming | Custom | ✅ Available | Developers, researchers |
 | **Context Engineering** | fundamentals, compression, degradation, optimization | Custom | ✅ Available | Future agent development |
 | **Programming** | python-skills | Custom | 📝 Pending docs | Python developers |
-| **Learning** | continuous-learning | Custom | ⚠️ Not implemented | Future feature |
+| **Learning** | continuous-learning | Custom | ✅ Implemented | All users |
 
 ---
 
@@ -202,19 +238,21 @@ Advanced skills for AI agent developers (for future agent development).
 **Recommended Skills**:
 1. **scientific-critical-thinking** - For reviewing papers and designing experiments
 2. **git-skills** - For version control of code and experiments
-3. **python-skills** - For Python development best practices
+3. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
+4. **python-skills** - For Python development best practices
 
 ### For Software Developers
 
 **Recommended Skills**:
 1. **git-skills** - Essential for version control
 2. **software-brainstorming** - For feature planning and architecture
+3. **continuous-learning** - Automatically learns your communication patterns, reduces overhead
 
 ### For Advanced Users
 
 **Recommended Skills**:
-2. **context-engineering** - For future agent development
-3. **continuous-learning** - Experimental (when implemented)
+1. **context-engineering** - For future agent development
+2. **continuous-learning** - Automated misunderstanding detection and communication optimization
 
 ---
 

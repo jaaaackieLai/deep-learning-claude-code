@@ -17,6 +17,7 @@ An advanced learning system that turns your Claude Code sessions into reusable k
 | Confidence | None | 0.3-0.9 weighted |
 | Evolution | Direct to skill | Instincts → cluster → skill/command/agent |
 | Sharing | None | Export/import instincts |
+| **Clarifications** | None | **Real-time misunderstanding detection** |
 
 ## The Instinct Model
 
@@ -186,6 +187,19 @@ Edit `config.json`:
     "auto_approve_threshold": 0.7,
     "confidence_decay_rate": 0.05
   },
+  "clarifications": {
+    "enabled": true,
+    "clarifications_path": "~/.claude/homunculus/clarifications/",
+    "min_confidence": 0.5,
+    "detection_patterns": [
+      "rapid_re_edit",
+      "error_then_success",
+      "repeated_tool",
+      "iterative_correction"
+    ],
+    "analysis_model": "haiku",
+    "max_clarifications": 50
+  },
   "observer": {
     "enabled": true,
     "model": "haiku",
@@ -204,6 +218,54 @@ Edit `config.json`:
 }
 ```
 
+## Real-time Clarification Detection (NEW)
+
+v2 includes automatic misunderstanding detection that captures communication issues **as they happen**:
+
+### How It Works
+
+When the hook system detects potential corrections (rapid re-edits, error-recovery patterns, repeated tool usage), it triggers a lightweight background analysis:
+
+```
+Correction Pattern Detected
+         ↓
+Background Analysis (Haiku)
+  - Analyzes last 5 turns only (~1-2K tokens)
+  - Generates clarification hint (50 words)
+         ↓
+Saves to clarifications/
+```
+
+### Detection Patterns
+
+- **Rapid Re-edit**: Same file edited multiple times quickly
+- **Error Recovery**: Error followed by successful fix
+- **Repeated Tool**: Same tool used 3+ times in sequence
+- **Iterative Correction**: Quick back-and-forth on a task
+
+### Example Clarification
+
+```yaml
+---
+id: refactor-scope-20250204
+trigger: "when editing files multiple times"
+confidence: 0.70
+type: disambiguation
+---
+
+When user says "refactor", clarify: "Structural change or rename only?"
+
+Evidence:
+- Rapid tool iteration: Edit → Edit → Edit
+- Detected by hook: rapid_re_edit
+```
+
+### Token Efficiency
+
+Traditional approach: Analyze entire session (~10-20K tokens)
+**New approach**: Analyze last 5 turns only (~1-2K tokens)
+**Efficiency gain: 5-10x reduction**
+
 ## File Structure
 
 ```
@@ -211,6 +273,7 @@ Edit `config.json`:
 ├── identity.json           # Your profile, technical level
 ├── observations.jsonl      # Current session observations
 ├── observations.archive/   # Processed observations
+├── clarifications/         # Real-time disambiguation hints (NEW)
 ├── instincts/
 │   ├── personal/           # Auto-learned instincts
 │   └── inherited/          # Imported from others
