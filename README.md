@@ -7,6 +7,19 @@ I hope that this repo can help software engineers who use Python in deep learnin
 
 Follow the [plugin-marketplaces](https://code.claude.com/docs/en/plugin-marketplaces) and [skills](https://code.claude.com/docs/en/skills) instructions provided by Anthropic.
 
+## Skills Guide
+
+This repository includes various skills tailored for deep learning researchers and Python developers. For detailed explanations of each skill category and their usage:
+
+- **English Guide**: [Skills Explanation](docs/en/skill-explain.md)
+- **繁體中文指南**: [技能說明](docs/zh-TW/skill-explain.md)
+
+These guides provide comprehensive information about:
+- Document processing skills (PDF, DOCX, PPTX, XLSX)
+- Context engineering fundamentals
+- Superpowers for development workflows
+- Code review and project management tools
+
 ## Adding Official Anthropic Skills
 
 This repository focuses on custom skills for deep learning researchers. To use official Anthropic skills (like document processing, MCP builders, etc.), add them using the Claude Code plugin system:
