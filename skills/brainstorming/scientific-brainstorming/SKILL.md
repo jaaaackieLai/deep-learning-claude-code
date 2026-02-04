@@ -1,9 +1,6 @@
 ---
 name: scientific-brainstorming
-description: "Use when generating research hypotheses, exploring interdisciplinary connections, challenging scientific assumptions, overcoming creative blocks in research, or designing experiments before data collection. For software feature design or implementation planning, use brainstorming instead."
-license: MIT license
-metadata:
-    skill-author: K-Dense Inc.
+description: "Use when generating research hypotheses, exploring interdisciplinary connections, challenging scientific assumptions, overcoming creative blocks in research, or designing experiments before data collection. For software feature design or implementation planning, use software-brainstorming instead."
 ---
 
 # Scientific Brainstorming

@@ -4,25 +4,29 @@
 
 ## 專案描述
 
-本專案為 Claude Code 的擴充市集，提供 commands、hooks、agents 及 skills 等元件，讓使用者能在自己的專案中擴充 Claude Code 的功能。
+本專案為 Claude Code 的擴充市集，提供 commands、hooks、agents、mcps 及 skills 等元件，讓使用者能在自己的專案中擴充 Claude Code 的功能。
 
 **目標受眾**：以 Python 進行軟體開發的深度學習研究學者
 
 **核心目標**：整合現有開源資源，精選並優化深度學習研究工作流程所需的工具與能力
-
-**參考資源**：都放在 ./reference_repo/ 中。
 
 
 ## Directory
 
 ```
 ├── .claude-plugin/     # Claude 插件配置
+├── agents/             # 代理程式目錄
+├── claude-settings/    # Claude 設定檔
 ├── CLAUDE.md           # 專案指引文件
-├── README.md           # 專案說明
+├── commands/           # 命令目錄
+├── docs/               # 文件目錄
+│   ├── en/            # 英文文件
+│   └── zh-TW/         # 繁體中文文件
+├── hooks/              # 鉤子目錄
+├── mcps/               # MCP 伺服器目錄
 ├── plugins/            # 插件目錄
+├── README.md           # 專案說明
 └── skills/             # 技能目錄
 ```
-
-## 參考 Repo
 
 
