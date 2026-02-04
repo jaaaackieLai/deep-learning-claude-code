@@ -92,92 +92,6 @@ The Claude Code Marketplace provides a curated collection of skills organized by
 
 ---
 
-## 📄 Document Skills
-
-**Source**: Anthropic Official Skills (`anthropic/skills`)
-
-A comprehensive suite for document creation, editing, and analysis.
-
-### pdf
-
-**Purpose**: PDF manipulation and analysis toolkit
-
-**Use Cases**:
-- Extracting text and tables from PDFs
-- Creating new PDF documents
-- Merging and splitting PDFs
-- Filling PDF forms programmatically
-- Large-scale PDF processing
-
-### docx
-
-**Purpose**: Microsoft Word document creation and editing
-
-**Use Cases**:
-- Creating professional documents
-- Editing existing Word files
-- Working with tracked changes and comments
-- Formatting preservation
-- Text extraction and analysis
-
-### pptx
-
-**Purpose**: PowerPoint presentation creation and editing
-
-**Use Cases**:
-- Creating new presentations
-- Modifying slide content and layouts
-- Adding comments and speaker notes
-- Extracting presentation data
-- Batch presentation processing
-
-### xlsx
-
-**Purpose**: Excel spreadsheet creation, editing, and analysis
-
-**Use Cases**:
-- Creating spreadsheets with formulas and formatting
-- Reading and analyzing data
-- Modifying existing spreadsheets while preserving formulas
-- Data visualization in spreadsheets
-- Recalculating formulas
-
-**Target Users**: Researchers needing to work with various document formats
-
----
-
-## 🏗️ Anthropic Skills
-
-**Source**: Anthropic Official Skills (`anthropic/skills`)
-
-Official skills from Anthropic for advanced Claude Code usage.
-
-### skill-creator
-
-**Purpose**: Guide for creating effective custom skills
-
-**Use Cases**:
-- Designing new skills with specialized knowledge
-- Implementing workflow automation
-- Integrating tools and APIs
-- Following skill development best practices
-- Creating skills that extend Claude's capabilities
-
-### mcp-builder
-
-**Purpose**: Building high-quality MCP (Model Context Protocol) servers
-
-**Use Cases**:
-- Creating MCP servers for external service integration
-- Designing well-structured tool interfaces
-- Implementing Python (FastMCP) or TypeScript (MCP SDK) servers
-- Enabling LLMs to interact with external services
-- Building production-ready integrations
-
-**Target Users**: Advanced users building custom integrations
-
----
-
 ## 🧮 Context Engineering
 
 Advanced skills for AI agent developers (for future agent development).
@@ -275,8 +189,6 @@ Advanced skills for AI agent developers (for future agent development).
 | **Version Control** | git-skills | Custom | ✅ Complete | All developers |
 | **Research** | scientific-critical-thinking | Custom | ✅ Complete | Researchers, scientists |
 | **Brainstorming** | software-brainstorming, scientific-brainstorming | Custom | ✅ Available | Developers, researchers |
-| **Documents** | pdf, docx, pptx, xlsx | **Anthropic** | ✅ Available | All users |
-| **Advanced** | skill-creator, mcp-builder | **Anthropic** | ✅ Available | Advanced users |
 | **Context Engineering** | fundamentals, compression, degradation, optimization | Custom | ✅ Available | Future agent development |
 | **Programming** | python-skills | Custom | 📝 Pending docs | Python developers |
 | **Learning** | continuous-learning | Custom | ⚠️ Not implemented | Future feature |
@@ -291,19 +203,16 @@ Advanced skills for AI agent developers (for future agent development).
 1. **scientific-critical-thinking** - For reviewing papers and designing experiments
 2. **git-skills** - For version control of code and experiments
 3. **python-skills** - For Python development best practices
-4. **document-skills** (xlsx, pdf) - For data analysis and documentation
 
 ### For Software Developers
 
 **Recommended Skills**:
 1. **git-skills** - Essential for version control
 2. **software-brainstorming** - For feature planning and architecture
-3. **skill-creator** - For creating custom skills
 
 ### For Advanced Users
 
 **Recommended Skills**:
-1. **mcp-builder** - For building service integrations
 2. **context-engineering** - For future agent development
 3. **continuous-learning** - Experimental (when implemented)
 
