@@ -1,0 +1,596 @@
+# Git 指令詳細參考
+
+## 1. 初始化與配置
+
+### git init
+初始化一個新的 Git 倉庫。
+```bash
+git init                    # 在當前目錄初始化
+git init <directory>        # 在指定目錄初始化
+```
+
+### git clone
+複製遠端倉庫到本地。
+```bash
+git clone <url>                          # 複製倉庫
+git clone <url> <directory>              # 複製到指定目錄
+git clone -b <branch> <url>              # 複製指定分支
+```
+
+### git config
+配置 Git 設定。
+```bash
+# 設定使用者資訊（全域）
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+
+# 查看配置
+git config --list                        # 列出所有配置
+git config user.name                     # 查看特定配置
+
+# 其他常用配置
+git config --global core.editor vim      # 設定預設編輯器
+git config --global alias.st status      # 設定指令別名
+git config --global pull.rebase false    # pull 時使用 merge 策略
+```
+
+---
+
+## 2. 基本操作
+
+### git status
+查看工作區狀態。
+```bash
+git status                   # 詳細狀態
+git status -s               # 簡短狀態
+git status -b               # 顯示分支資訊
+```
+
+### git add
+將檔案加入暫存區。
+```bash
+git add <file>              # 加入特定檔案
+git add .                   # 加入所有變更（當前目錄及子目錄）
+git add -A                  # 加入所有變更（整個倉庫）
+git add -u                  # 只加入已追蹤的檔案
+git add -p                  # 互動式選擇要加入的變更
+```
+
+### git commit
+提交變更。
+```bash
+git commit -m "message"           # 提交並附上訊息
+git commit -am "message"          # 加入所有已追蹤檔案並提交
+git commit --amend                # 修改最後一次提交
+git commit --amend --no-edit      # 修改最後一次提交但不改訊息
+```
+
+**Commit 訊息最佳實踐：**
+- 第一行：簡短摘要（50 字以內）
+- 空一行
+- 詳細說明（可選）
+
+### git diff
+查看差異。
+```bash
+git diff                    # 工作區 vs 暫存區
+git diff --staged           # 暫存區 vs 最後一次 commit
+git diff HEAD               # 工作區 vs 最後一次 commit
+git diff <branch1> <branch2>  # 比較兩個分支
+git diff <commit1> <commit2>  # 比較兩個 commit
+```
+
+### git rm
+刪除檔案。
+```bash
+git rm <file>               # 刪除檔案並從 Git 移除
+git rm --cached <file>      # 只從 Git 移除，保留本地檔案
+git rm -r <directory>       # 遞迴刪除目錄
+```
+
+### git mv
+移動或重新命名檔案。
+```bash
+git mv <old> <new>          # 移動/重新命名檔案
+```
+
+---
+
+## 3. 分支管理
+
+### git branch
+管理分支。
+```bash
+# 查看分支
+git branch                  # 列出本地分支
+git branch -r               # 列出遠端分支
+git branch -a               # 列出所有分支
+git branch -v               # 顯示最後一次 commit
+
+# 創建分支
+git branch <branch-name>              # 創建新分支
+git branch <branch-name> <commit>     # 從指定 commit 創建分支
+
+# 刪除分支
+git branch -d <branch-name>           # 刪除已合併的分支
+git branch -D <branch-name>           # 強制刪除分支
+
+# 重新命名分支
+git branch -m <old-name> <new-name>   # 重新命名分支
+git branch -m <new-name>              # 重新命名當前分支
+```
+
+### git checkout
+切換分支或還原檔案（較舊的指令，建議使用 git switch 和 git restore）。
+```bash
+git checkout <branch>              # 切換分支
+git checkout -b <branch>           # 創建並切換到新分支
+git checkout <commit>              # 切換到特定 commit（detached HEAD）
+git checkout -- <file>             # 還原檔案到最後一次 commit
+```
+
+### git switch
+切換分支（Git 2.23+ 推薦使用）。
+```bash
+git switch <branch>                # 切換分支
+git switch -c <branch>             # 創建並切換到新分支
+git switch -                       # 切換回上一個分支
+```
+
+### git merge
+合併分支。
+```bash
+git merge <branch>                 # 合併指定分支到當前分支
+git merge --no-ff <branch>         # 強制創建 merge commit
+git merge --squash <branch>        # 壓縮合併（不創建 merge commit）
+git merge --abort                  # 取消合併（解決衝突時）
+```
+
+**合併衝突處理：**
+1. 查看衝突檔案：`git status`
+2. 手動編輯檔案解決衝突
+3. 標記為已解決：`git add <file>`
+4. 完成合併：`git commit`
+
+---
+
+## 4. 遠端操作
+
+### git remote
+管理遠端倉庫。
+```bash
+git remote                         # 列出遠端倉庫
+git remote -v                      # 顯示詳細資訊
+git remote add <name> <url>        # 新增遠端倉庫
+git remote remove <name>           # 移除遠端倉庫
+git remote rename <old> <new>      # 重新命名遠端倉庫
+git remote show <name>             # 顯示遠端倉庫詳情
+```
+
+### git fetch
+下載遠端變更但不合併。
+```bash
+git fetch                          # 下載所有遠端分支
+git fetch <remote>                 # 下載特定遠端倉庫
+git fetch <remote> <branch>        # 下載特定分支
+git fetch --all                    # 下載所有遠端倉庫
+git fetch --prune                  # 清理已刪除的遠端分支
+```
+
+### git pull
+下載並合併遠端變更。
+```bash
+git pull                           # pull 當前分支
+git pull <remote> <branch>         # pull 特定分支
+git pull --rebase                  # 使用 rebase 而非 merge
+git pull --no-rebase               # 強制使用 merge
+```
+
+### git push
+推送變更到遠端。
+```bash
+git push                           # 推送當前分支
+git push <remote> <branch>         # 推送到特定分支
+git push -u origin <branch>        # 推送並設定上游分支
+git push --all                     # 推送所有分支
+git push --tags                    # 推送所有標籤
+git push origin --delete <branch>  # 刪除遠端分支
+git push --force                   # 強制推送（危險！）
+git push --force-with-lease        # 較安全的強制推送
+```
+
+---
+
+## 5. 歷史查看
+
+### git log
+查看提交歷史。
+```bash
+git log                            # 顯示完整歷史
+git log --oneline                  # 每個 commit 一行
+git log --graph                    # 圖形化顯示
+git log --all                      # 顯示所有分支
+git log -n <number>                # 限制顯示數量
+git log --since="2 weeks ago"      # 顯示特定時間後的 commit
+git log --author="name"            # 顯示特定作者的 commit
+git log --grep="keyword"           # 搜尋 commit 訊息
+git log <file>                     # 顯示特定檔案的歷史
+git log --follow <file>            # 追蹤檔案重新命名
+
+# 常用組合
+git log --oneline --graph --all --decorate
+```
+
+### git show
+顯示 commit 詳情。
+```bash
+git show                           # 顯示最後一次 commit
+git show <commit>                  # 顯示特定 commit
+git show <commit>:<file>           # 顯示特定檔案的內容
+git show --stat                    # 顯示統計資訊
+```
+
+### git blame
+查看每一行的最後修改者。
+```bash
+git blame <file>                   # 顯示檔案的修改歷史
+git blame -L 10,20 <file>          # 只顯示第 10-20 行
+```
+
+---
+
+## 6. 撤銷修改
+
+### git restore
+還原檔案（Git 2.23+ 推薦使用）。
+```bash
+git restore <file>                 # 還原工作區的檔案
+git restore --staged <file>        # 從暫存區移除檔案
+git restore --source=<commit> <file>  # 從特定 commit 還原
+```
+
+### git reset
+重置當前分支。
+```bash
+# Soft reset - 保留變更在暫存區
+git reset --soft HEAD~1            # 撤銷最後一次 commit
+
+# Mixed reset（預設）- 保留變更在工作區
+git reset HEAD~1                   # 撤銷 commit 和 add
+
+# Hard reset - 完全捨棄變更（危險！）
+git reset --hard HEAD~1            # 完全撤銷最後一次 commit
+git reset --hard origin/<branch>   # 重置到遠端狀態
+
+git reset <file>                   # 從暫存區移除檔案（等同 restore --staged）
+```
+
+### git revert
+創建新 commit 來撤銷變更（安全的撤銷方式）。
+```bash
+git revert <commit>                # 撤銷特定 commit
+git revert HEAD                    # 撤銷最後一次 commit
+git revert --no-commit <commit>    # 撤銷但不自動 commit
+```
+
+### git clean
+清理未追蹤的檔案。
+```bash
+git clean -n                       # 預覽要刪除的檔案
+git clean -f                       # 刪除未追蹤的檔案
+git clean -fd                      # 刪除未追蹤的檔案和目錄
+git clean -fx                      # 包含 .gitignore 中的檔案
+```
+
+---
+
+## 7. 進階操作
+
+### git stash
+暫存工作進度。
+```bash
+git stash                          # 暫存變更
+git stash save "message"           # 暫存並加上訊息
+git stash list                     # 列出所有 stash
+git stash show                     # 顯示最新 stash 的內容
+git stash apply                    # 套用最新 stash（保留 stash）
+git stash pop                      # 套用並刪除最新 stash
+git stash drop                     # 刪除最新 stash
+git stash clear                    # 清空所有 stash
+git stash apply stash@{n}          # 套用特定 stash
+```
+
+### git rebase
+變基（重新整理 commit 歷史）。
+```bash
+git rebase <branch>                # 將當前分支 rebase 到指定分支
+git rebase -i HEAD~3               # 互動式 rebase 最近 3 個 commit
+git rebase --continue              # 解決衝突後繼續
+git rebase --abort                 # 取消 rebase
+
+# 互動式 rebase 命令：
+# pick - 保留 commit
+# reword - 修改 commit 訊息
+# edit - 修改 commit 內容
+# squash - 合併到前一個 commit
+# fixup - 合併但捨棄 commit 訊息
+# drop - 刪除 commit
+```
+
+### git cherry-pick
+挑選特定 commit 套用到當前分支。
+```bash
+git cherry-pick <commit>           # 套用特定 commit
+git cherry-pick <commit1> <commit2>  # 套用多個 commit
+git cherry-pick --continue         # 解決衝突後繼續
+git cherry-pick --abort            # 取消 cherry-pick
+```
+
+### git tag
+標籤管理。
+```bash
+# 創建標籤
+git tag <tagname>                  # 輕量標籤
+git tag -a <tagname> -m "message"  # 附註標籤
+git tag <tagname> <commit>         # 在特定 commit 創建標籤
+
+# 查看標籤
+git tag                            # 列出所有標籤
+git show <tagname>                 # 顯示標籤詳情
+
+# 推送標籤
+git push origin <tagname>          # 推送特定標籤
+git push origin --tags             # 推送所有標籤
+
+# 刪除標籤
+git tag -d <tagname>               # 刪除本地標籤
+git push origin --delete <tagname> # 刪除遠端標籤
+```
+
+### git reflog
+查看所有操作歷史（包括已刪除的 commit）。
+```bash
+git reflog                         # 顯示操作歷史
+git reflog show <branch>           # 顯示特定分支的歷史
+
+# 用於救回誤刪的 commit
+git reset --hard <commit-hash>     # 從 reflog 找到 hash 後恢復
+```
+
+### git submodule
+管理子模組（將其他 Git 倉庫作為子目錄嵌入到當前倉庫）。
+
+```bash
+# 添加子模組
+git submodule add <url> <path>              # 添加子模組到指定路徑
+git submodule add <url>                     # 添加子模組（使用倉庫名作為路徑）
+git submodule add -b <branch> <url> <path>  # 添加並追蹤特定分支
+
+# 初始化和更新子模組
+git submodule init                          # 初始化子模組配置
+git submodule update                        # 更新子模組到指定 commit
+git submodule update --init                 # 初始化並更新（組合指令）
+git submodule update --init --recursive     # 初始化並更新所有嵌套子模組
+
+# 克隆包含子模組的倉庫
+git clone --recursive <url>                 # 克隆倉庫並自動初始化子模組
+git clone <url>                             # 先克隆主倉庫
+git submodule update --init --recursive     # 再初始化子模組
+
+# 更新子模組到遠端最新版本
+git submodule update --remote               # 更新所有子模組到遠端分支最新
+git submodule update --remote <path>        # 更新特定子模組
+
+# 查看子模組狀態
+git submodule status                        # 查看所有子模組狀態
+git submodule status --recursive            # 包含嵌套子模組
+
+# 對所有子模組執行指令
+git submodule foreach <command>             # 對每個子模組執行指令
+git submodule foreach git pull origin main  # 例：更新所有子模組
+git submodule foreach --recursive <command> # 包含嵌套子模組
+
+# 刪除子模組
+git submodule deinit <path>                 # 取消註冊子模組
+git rm <path>                               # 刪除子模組目錄
+rm -rf .git/modules/<path>                  # 刪除 Git 模組目錄
+
+# 同步子模組 URL（當 .gitmodules 更新後）
+git submodule sync                          # 同步 URL 到 .git/config
+git submodule sync --recursive              # 包含嵌套子模組
+```
+
+**常見工作流程：**
+
+```bash
+# 1. 在專案中添加子模組
+git submodule add https://github.com/user/repo.git libs/repo
+git commit -m "Add submodule: libs/repo"
+
+# 2. 克隆包含子模組的專案
+git clone --recursive https://github.com/user/main-project.git
+# 或者
+git clone https://github.com/user/main-project.git
+cd main-project
+git submodule update --init --recursive
+
+# 3. 更新子模組到最新版本
+cd libs/repo
+git pull origin main
+cd ../..
+git add libs/repo
+git commit -m "Update submodule to latest version"
+
+# 或使用 update --remote
+git submodule update --remote libs/repo
+git commit -am "Update submodule to remote latest"
+
+# 4. 在子模組中進行修改
+cd libs/repo
+git checkout -b feature-branch
+# 進行修改
+git commit -am "Add feature"
+git push origin feature-branch
+cd ../..
+git add libs/repo
+git commit -m "Update submodule pointer"
+```
+
+**重要注意事項：**
+- 子模組是獨立的 Git 倉庫，有自己的歷史和分支
+- 主倉庫只記錄子模組的特定 commit hash
+- 更新子模組後需要在主倉庫中 commit 新的指標
+- 子模組預設處於 "detached HEAD" 狀態，修改前需先切換分支
+- 使用 `.gitmodules` 檔案追蹤子模組配置
+
+**常見問題：**
+
+```bash
+# 子模組處於 detached HEAD 狀態
+cd submodule-path
+git checkout main              # 切換到分支
+
+# 子模組有未提交的變更
+cd submodule-path
+git status                     # 檢查狀態
+git commit -am "Save changes"  # 提交變更
+
+# 子模組 URL 變更
+# 1. 編輯 .gitmodules 檔案更新 URL
+# 2. 同步配置
+git submodule sync
+# 3. 更新子模組
+git submodule update --init
+```
+
+---
+
+## 8. .gitignore 檔案
+
+`.gitignore` 用於指定 Git 應該忽略的檔案。
+
+### 基本語法
+```gitignore
+# 註解
+*.log                  # 忽略所有 .log 檔案
+!important.log         # 但不忽略 important.log
+/temp                  # 只忽略根目錄的 temp
+temp/                  # 忽略所有 temp 目錄
+doc/*.txt              # 忽略 doc 目錄下的 .txt（不包含子目錄）
+doc/**/*.txt           # 忽略 doc 目錄及子目錄下的所有 .txt
+```
+
+### 常見忽略範例
+```gitignore
+# OS 相關
+.DS_Store              # macOS
+Thumbs.db              # Windows
+*.swp                  # Vim
+
+# IDE 相關
+.vscode/
+.idea/
+*.suo
+
+# 語言/框架相關
+node_modules/          # Node.js
+__pycache__/           # Python
+*.pyc                  # Python
+target/                # Java/Maven
+*.class                # Java
+
+# 環境變數
+.env
+.env.local
+
+# 建置產物
+dist/
+build/
+*.o
+```
+
+---
+
+## 9. 常見問題與解決方案
+
+### 撤銷已經 push 的 commit
+```bash
+# 方法 1: Revert（推薦，安全）
+git revert <commit>
+git push
+
+# 方法 2: Reset + Force Push（危險，會改寫歷史）
+git reset --hard HEAD~1
+git push --force-with-lease
+```
+
+### 修改最後一次 commit
+```bash
+# 修改訊息
+git commit --amend -m "new message"
+
+# 加入忘記的檔案
+git add forgotten-file
+git commit --amend --no-edit
+```
+
+### 找回已刪除的檔案
+```bash
+# 查找刪除檔案的 commit
+git log --all --full-history -- path/to/file
+
+# 恢復檔案
+git checkout <commit>^ -- path/to/file
+```
+
+### 清理已合併的分支
+```bash
+# 查看已合併的分支
+git branch --merged
+
+# 刪除本地已合併的分支
+git branch -d <branch-name>
+
+# 刪除遠端已合併的分支
+git push origin --delete <branch-name>
+```
+
+### 同步 fork 的專案
+```bash
+# 加入上游倉庫
+git remote add upstream <original-repo-url>
+
+# 同步
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+```
+
+---
+
+## 10. Git 工作流程建議
+
+### Feature Branch Workflow（功能分支流程）
+1. 從 main 創建功能分支：`git checkout -b feature/new-feature`
+2. 開發並提交：`git add .` → `git commit -m "message"`
+3. 推送分支：`git push -u origin feature/new-feature`
+4. 創建 Pull Request/Merge Request
+5. Code Review 通過後合併到 main
+6. 刪除功能分支：`git branch -d feature/new-feature`
+
+### Gitflow Workflow
+- `main` - 生產環境
+- `develop` - 開發環境
+- `feature/*` - 功能分支（從 develop 分出）
+- `release/*` - 發布分支
+- `hotfix/*` - 緊急修復分支（從 main 分出）
+
+### 最佳實踐
+- 經常 commit，每個 commit 只做一件事
+- 寫清楚的 commit 訊息
+- 定期 pull 遠端變更
+- 在 push 前先 pull
+- 使用分支進行功能開發
+- 合併前先測試
+- 不要 commit 敏感資訊（密碼、API key 等）

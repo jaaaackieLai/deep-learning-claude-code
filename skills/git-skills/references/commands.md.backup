@@ -357,6 +357,112 @@ git reflog show <branch>           # 顯示特定分支的歷史
 git reset --hard <commit-hash>     # 從 reflog 找到 hash 後恢復
 ```
 
+### git submodule
+管理子模組（將其他 Git 倉庫作為子目錄嵌入到當前倉庫）。
+
+```bash
+# 添加子模組
+git submodule add <url> <path>              # 添加子模組到指定路徑
+git submodule add <url>                     # 添加子模組（使用倉庫名作為路徑）
+git submodule add -b <branch> <url> <path>  # 添加並追蹤特定分支
+
+# 初始化和更新子模組
+git submodule init                          # 初始化子模組配置
+git submodule update                        # 更新子模組到指定 commit
+git submodule update --init                 # 初始化並更新（組合指令）
+git submodule update --init --recursive     # 初始化並更新所有嵌套子模組
+
+# 克隆包含子模組的倉庫
+git clone --recursive <url>                 # 克隆倉庫並自動初始化子模組
+git clone <url>                             # 先克隆主倉庫
+git submodule update --init --recursive     # 再初始化子模組
+
+# 更新子模組到遠端最新版本
+git submodule update --remote               # 更新所有子模組到遠端分支最新
+git submodule update --remote <path>        # 更新特定子模組
+
+# 查看子模組狀態
+git submodule status                        # 查看所有子模組狀態
+git submodule status --recursive            # 包含嵌套子模組
+
+# 對所有子模組執行指令
+git submodule foreach <command>             # 對每個子模組執行指令
+git submodule foreach git pull origin main  # 例：更新所有子模組
+git submodule foreach --recursive <command> # 包含嵌套子模組
+
+# 刪除子模組
+git submodule deinit <path>                 # 取消註冊子模組
+git rm <path>                               # 刪除子模組目錄
+rm -rf .git/modules/<path>                  # 刪除 Git 模組目錄
+
+# 同步子模組 URL（當 .gitmodules 更新後）
+git submodule sync                          # 同步 URL 到 .git/config
+git submodule sync --recursive              # 包含嵌套子模組
+```
+
+**常見工作流程：**
+
+```bash
+# 1. 在專案中添加子模組
+git submodule add https://github.com/user/repo.git libs/repo
+git commit -m "Add submodule: libs/repo"
+
+# 2. 克隆包含子模組的專案
+git clone --recursive https://github.com/user/main-project.git
+# 或者
+git clone https://github.com/user/main-project.git
+cd main-project
+git submodule update --init --recursive
+
+# 3. 更新子模組到最新版本
+cd libs/repo
+git pull origin main
+cd ../..
+git add libs/repo
+git commit -m "Update submodule to latest version"
+
+# 或使用 update --remote
+git submodule update --remote libs/repo
+git commit -am "Update submodule to remote latest"
+
+# 4. 在子模組中進行修改
+cd libs/repo
+git checkout -b feature-branch
+# 進行修改
+git commit -am "Add feature"
+git push origin feature-branch
+cd ../..
+git add libs/repo
+git commit -m "Update submodule pointer"
+```
+
+**重要注意事項：**
+- 子模組是獨立的 Git 倉庫，有自己的歷史和分支
+- 主倉庫只記錄子模組的特定 commit hash
+- 更新子模組後需要在主倉庫中 commit 新的指標
+- 子模組預設處於 "detached HEAD" 狀態，修改前需先切換分支
+- 使用 `.gitmodules` 檔案追蹤子模組配置
+
+**常見問題：**
+
+```bash
+# 子模組處於 detached HEAD 狀態
+cd submodule-path
+git checkout main              # 切換到分支
+
+# 子模組有未提交的變更
+cd submodule-path
+git status                     # 檢查狀態
+git commit -am "Save changes"  # 提交變更
+
+# 子模組 URL 變更
+# 1. 編輯 .gitmodules 檔案更新 URL
+# 2. 同步配置
+git submodule sync
+# 3. 更新子模組
+git submodule update --init
+```
+
 ---
 
 ## 8. .gitignore 檔案
