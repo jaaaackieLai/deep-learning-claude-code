@@ -1,5 +1,5 @@
 ---
-name: brainstorming
+name: software-brainstorming
 description: "Use before implementing features, building components, or modifying code behavior. Explores software design requirements, architecture, and technical constraints. For research hypothesis generation or experimental design, use scientific-brainstorming instead."
 ---
 

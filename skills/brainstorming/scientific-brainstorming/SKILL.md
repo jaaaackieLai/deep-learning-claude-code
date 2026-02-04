@@ -12,7 +12,7 @@ metadata:
 
 Scientific brainstorming is a conversational process for generating novel research ideas. Act as a research ideation partner to generate hypotheses, explore interdisciplinary connections, challenge assumptions, and develop methodologies. Apply this skill for creative scientific problem-solving.
 
-**Scope:** This skill focuses on **scientific research ideation** (hypotheses, experimental design, methodologies, theoretical frameworks). For **software engineering design** (features, components, system architecture), use `brainstorming` instead.
+**Scope:** This skill focuses on **scientific research ideation** (hypotheses, experimental design, methodologies, theoretical frameworks). For **software engineering design** (features, components, system architecture), use `software-brainstorming` instead.
 
 ## When to Use This Skill
 
