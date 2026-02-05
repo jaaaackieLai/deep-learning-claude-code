@@ -98,6 +98,14 @@
       "strict": false
     },
     {
+      "name": "paper-council-skill",
+      "source": "./skills/paper",
+      "description": "Transform research papers and code repositories into high-quality reusable skills through multi-agent council deliberation with 3 specialist analysts, anonymized peer review, and chairman synthesis",
+      "version": "1.0.0",
+      "category": "research",
+      "strict": false
+    },
+    {
       "name": "continuous-learning-skill",
       "source": "./skills/continuous-learning",
       "description": "Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents",

@@ -62,6 +62,52 @@ The Claude Code Marketplace provides a curated collection of skills organized by
 
 ---
 
+### paper
+
+**Purpose**: Transform research papers and their code repositories into high-quality reusable skills through multi-agent council deliberation
+
+**Use Cases**:
+- Package a research paper with its implementation code into a structured skill
+- Create a quick-reference guide for understanding and applying a specific paper
+- Build a reusable skill that captures a paper's problem, solution, and contributions
+- Analyze paper-code alignment (what the paper claims vs. what the code implements)
+
+**How It Works**:
+
+The skill uses a 5-phase council deliberation process:
+
+1. **Phase 0 - Information Gathering**: Reads the paper PDF (via `/pdf`), clones the GitHub repo, and prepares shared context
+2. **Phase 1 - Independent Specialist Analysis**: 3 analysts run in parallel:
+   - **Analyst A** (Theory & Method): Research methodology, mathematical formulations, experimental design
+   - **Analyst B** (Literature & Concepts): Terminology, related work, field positioning, novelty assessment
+   - **Analyst C** (Code & Practice): Repository structure, setup guide, usage patterns, reproducibility
+3. **Phase 2 - Anonymized Peer Review**: Each analyst reviews the other two analyses without knowing who produced them (adapted from llm-council's anonymized ranking). Scores on accuracy, completeness, clarity, and usefulness (1-5 scale).
+4. **Phase 3 - Chairman Synthesis**: A chairman agent receives all analyses, peer reviews, and quality scores, then synthesizes the best content weighted by aggregate scores.
+5. **Phase 4 - Write Skill Files**: Outputs 4 structured files to `skills/<paper-name>/`:
+   - `SKILL.md` - Entry point with summary, key concepts, quick start
+   - `references/paper_summary.md` - Comprehensive paper analysis
+   - `references/key_concepts.md` - Concept reference with math formulations
+   - `references/code_guide.md` - Practical code usage guide
+
+**Modes**:
+- **Claude-only** (default): All agents run as Claude Task subagents. No external dependencies.
+- **Multi-model** (user-requested): Uses Claude, GPT, and Gemini via MCP servers for true model diversity and better blind spot detection.
+
+**Inputs Required**:
+- Path to the paper PDF file
+- GitHub URL of the implementation repository
+
+**Structure**:
+- `SKILL.md` - Main workflow definition
+- `references/analyst-roles.md` - Specialist role definitions and prompt templates
+- `references/peer-review-protocol.md` - Anonymized review process and scoring
+- `references/synthesis-guide.md` - Chairman instructions for final synthesis
+- `references/skill-output-templates.md` - Templates for the 4 generated skill files
+
+**Target Users**: Deep learning researchers who want to quickly understand and apply new papers
+
+---
+
 ## 🧠 Brainstorming
 
 ### software-brainstorming
@@ -223,7 +269,7 @@ Evidence:
 | Skill Category | Skills | Source | Status | Target Audience |
 |----------------|--------|--------|--------|-----------------|
 | **Version Control** | git-skills | Custom | ✅ Complete | All developers |
-| **Research** | scientific-critical-thinking | Custom | ✅ Complete | Researchers, scientists |
+| **Research** | scientific-critical-thinking, paper | Custom | ✅ Complete | Researchers, scientists |
 | **Brainstorming** | software-brainstorming, scientific-brainstorming | Custom | ✅ Available | Developers, researchers |
 | **Context Engineering** | fundamentals, compression, degradation, optimization | Custom | ✅ Available | Future agent development |
 | **Programming** | python-skills | Custom | 📝 Pending docs | Python developers |
@@ -237,9 +283,9 @@ Evidence:
 
 **Recommended Skills**:
 1. **scientific-critical-thinking** - For reviewing papers and designing experiments
-2. **git-skills** - For version control of code and experiments
-3. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
-4. **python-skills** - For Python development best practices
+2. **paper** - Transform papers and code repos into reusable skill references
+3. **git-skills** - For version control of code and experiments
+4. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
 
 ### For Software Developers
 

@@ -1,25 +1,41 @@
 ---
 name: paper
-description: Transform research papers and their code repositories into reusable skills for quick understanding and practical application. Use when users want to package a paper with its implementation code, create a reference guide for a specific paper, or build a skill that captures a paper's problem, solution, and contributions. Triggers include requests like "package this paper as a skill", "create a skill from paper X and its code", or "analyze paper and code to make a reusable reference".
+description: Transform research papers and their code repositories into high-quality reusable skills through multi-agent council deliberation. Three specialist analysts independently examine the paper and code, then anonymously peer-review each other's work, and a chairman synthesizes the best content into structured skill files. Use when users want to package a paper with its implementation code, create a reference guide for a specific paper, or build a skill that captures a paper's problem, solution, and contributions. Triggers include requests like "package this paper as a skill", "create a skill from paper X and its code", or "analyze paper and code to make a reusable reference".
 ---
 
-# Paper Skill Creator
+# Paper Council
 
-This skill guides the process of transforming a research paper and its code repository into a structured, reusable skill that enables quick understanding and practical application.
+Transform research papers and code repositories into high-quality reusable skills through multi-agent council deliberation.
 
-## Purpose
+## How It Works
 
-Create a skill that packages:
-- Research paper (PDF)
-- Implementation code (GitHub repository)
-- Structured analysis of problem, solution, and contributions
-- Practical usage examples and key concepts
+Three specialist analysts independently examine the paper and code, then anonymously peer-review each other's work. A chairman synthesizes the highest-rated content into structured skill files. This catches blind spots and errors that a single-agent approach would miss.
 
-The resulting skill allows users to quickly grasp the paper's essence without re-reading, and apply the methods in their own research.
+```
+Paper PDF + GitHub Repo
+        |
+  [Phase 0] Gather information
+        |
+  [Phase 1] 3 parallel specialist analyses
+        |
+  [Phase 2] 3 parallel anonymized peer reviews
+        |
+  [Phase 3] Chairman synthesis
+        |
+  [Phase 4] Write skill files
+```
 
-## Workflow
+## Mode Selection
 
-### Step 1: Gather Inputs
+**Claude-only mode** (default): All agents run as Claude Task subagents. Simpler, no external dependencies.
+
+**Multi-model mode** (user must request): Uses Claude, GPT, and Gemini for true model diversity. Requires `gpt_messages` and `gemini_messages` MCP servers. Better blind spot detection.
+
+---
+
+## Phase 0: Information Gathering
+
+### Step 0.1: Collect Inputs
 
 Collect from the user:
 1. **Paper location**: Path to the PDF file
@@ -27,423 +43,229 @@ Collect from the user:
 
 Both inputs are required. If either is missing, request it from the user.
 
-### Step 2: Clone and Explore Repository
+### Step 0.2: Read the Paper
 
-Clone the repository to understand the codebase structure:
-
-```bash
-git clone <github-url> ./paper_repos/<paper-name>
-```
-
-Then explore the repository structure to identify:
-- **Model files**: `model.py`, `network.py`, `architecture.py`, etc.
-- **Training files**: `train.py`, `main.py`, `run.py`, etc.
-- **Config files**: `config.py`, `settings.py`, YAML configs
-- **Data files**: `dataset.py`, `dataloader.py`, `data_utils.py`
-- **Notebooks**: Jupyter notebooks with examples or experiments
-- **README**: Setup and usage instructions
-
-Use Glob and Read tools to identify these files:
-
-```bash
-# Find Python files
-ls **/*.py
-
-# Find key files
-ls README.md requirements.txt environment.yml
-```
-
-### Step 3: Analyze Paper Content
-
-Use the `pdf` skill to read and analyze the paper:
+Use the `/pdf` skill to read and extract the paper content:
 
 ```
 /pdf <paper-path>
 ```
 
-Extract and structure the following information:
+Store the extracted text as `paper_text` for use as shared context.
 
-1. **Problem Statement**
-   - What problem does the paper address?
-   - Why is it important?
-   - What are the limitations of existing approaches?
+### Step 0.3: Clone and Explore Repository
 
-2. **Proposed Solution**
-   - Core methodology and approach
-   - Key innovations or novel contributions
-   - Technical details (architecture, algorithm, etc.)
+```bash
+git clone <github-url> ./paper_repos/<paper-name>
+```
 
-3. **Main Contributions**
-   - What new insights or methods does the paper provide?
-   - Experimental results and improvements
-   - Practical implications
+Explore the repository to build a structural overview:
 
-4. **Key Concepts**
-   - Important terminology and definitions
-   - Mathematical formulations (if applicable)
-   - Relationships to prior work
+- Use Glob to find Python files: `**/*.py`
+- Use Glob to find config files: `**/*.yaml`, `**/*.yml`, `**/*.json`
+- Read `README.md`, `requirements.txt`, `environment.yml`
+- Identify model files, training scripts, data loaders, notebooks
 
-### Step 4: Analyze Code Implementation
+Store the annotated directory listing as `repo_structure` for use as shared context.
 
-Read the key files identified in Step 2 to understand:
+### Step 0.4: Prepare Shared Context
 
-1. **Core Implementation**
-   - Main model/algorithm implementation
-   - Key classes and functions
-   - How the paper's method is realized in code
-
-2. **Usage Patterns**
-   - How to initialize and use the model
-   - Required dependencies and setup
-   - Configuration options
-
-3. **Example Workflows**
-   - Training scripts and their usage
-   - Inference/evaluation examples
-   - Data preparation steps
-
-### Step 5: Generate the Skill
-
-Create a new skill using `/skill-creator` with the following structure:
-
-#### Skill Structure
+Combine into a single context block:
 
 ```
-<paper-name>/
+SHARED CONTEXT:
+
+=== PAPER CONTENT ===
+[paper_text]
+
+=== REPOSITORY STRUCTURE ===
+[repo_structure]
+
+=== KEY FILES ===
+[contents of the 5-10 most important files, with paths]
+```
+
+---
+
+## Phase 1: Independent Specialist Analysis
+
+Launch 3 analysts in parallel. Each receives the shared context but a different system prompt.
+
+See [references/analyst-roles.md](references/analyst-roles.md) for complete role definitions.
+
+### Claude-only Mode
+
+```
+# Launch all 3 in parallel using Task tool
+Task(subagent_type="general-purpose", prompt="[Analyst A system prompt]\n\n[shared context]")
+Task(subagent_type="general-purpose", prompt="[Analyst B system prompt]\n\n[shared context]")
+Task(subagent_type="general-purpose", prompt="[Analyst C system prompt]\n\n[shared context]")
+```
+
+### Multi-model Mode
+
+```
+# Analyst A: Claude (Task subagent)
+Task(subagent_type="general-purpose", prompt="[Analyst A system prompt]\n\n[shared context]")
+
+# Analyst B: GPT (via MCP)
+gpt_messages(messages=[
+  {role: "system", content: "[Analyst B system prompt]"},
+  {role: "user", content: "[shared context]"}
+])
+
+# Analyst C: Gemini (via MCP)
+gemini_messages(messages=[
+  {role: "system", content: "[Analyst C system prompt]"},
+  {role: "user", content: "[shared context]"}
+])
+```
+
+Store the 3 analysis outputs as `analysis_A`, `analysis_B`, `analysis_C`.
+
+---
+
+## Phase 2: Anonymized Peer Review
+
+Each analyst reviews the OTHER TWO analyses without knowing who produced them.
+
+See [references/peer-review-protocol.md](references/peer-review-protocol.md) for the complete protocol.
+
+### Step 2.1: Prepare Review Packets
+
+For each reviewer, prepare a packet with the other two analyses anonymized:
+
+| Reviewer | Receives | As |
+|----------|----------|----|
+| Analyst A | analysis_B + analysis_C | "Analysis X" + "Analysis Y" |
+| Analyst B | analysis_A + analysis_C | "Analysis X" + "Analysis Y" |
+| Analyst C | analysis_A + analysis_B | "Analysis X" + "Analysis Y" |
+
+Randomize which analysis gets X vs Y for each reviewer.
+
+### Step 2.2: Launch Reviews in Parallel
+
+Use the review prompt template from [references/peer-review-protocol.md](references/peer-review-protocol.md). Launch all 3 reviews in parallel using the same model assignment as Phase 1.
+
+### Step 2.3: Parse Quality Scores
+
+Extract the `QUALITY ASSESSMENT:` section from each review. Calculate aggregate scores per the protocol.
+
+### Step 2.4: Identify Consensus and Disputes
+
+Note where reviewers agree (consensus) and disagree (disputes). Flag points marked as "missed" by multiple reviewers.
+
+---
+
+## Phase 3: Chairman Synthesis
+
+A single chairman agent receives everything and produces the final skill files.
+
+See [references/synthesis-guide.md](references/synthesis-guide.md) for complete instructions.
+
+### Chairman Input
+
+Provide the chairman with:
+
+```
+CHAIRMAN SYNTHESIS TASK:
+
+You are the chairman of a paper analysis council. Synthesize the materials below
+into 4 skill output files following the templates provided.
+
+=== PAPER TITLE ===
+[title]
+
+=== SHARED CONTEXT ===
+[paper_text + repo_structure]
+
+=== SPECIALIST ANALYSES ===
+
+Analyst A (Theory & Method) [Aggregate Score: X.XX]:
+[analysis_A]
+
+Analyst B (Literature & Concepts) [Aggregate Score: X.XX]:
+[analysis_B]
+
+Analyst C (Code & Practice) [Aggregate Score: X.XX]:
+[analysis_C]
+
+=== PEER REVIEWS ===
+
+Review by Analyst A:
+[review_A]
+
+Review by Analyst B:
+[review_B]
+
+Review by Analyst C:
+[review_C]
+
+=== CONSENSUS AND DISPUTES ===
+[consensus_and_disputes summary]
+
+=== OUTPUT TEMPLATES ===
+[contents of references/skill-output-templates.md]
+
+=== SYNTHESIS GUIDE ===
+[contents of references/synthesis-guide.md]
+
+Generate the 4 files. Separate each file with a clear delimiter:
+--- FILE: SKILL.md ---
+--- FILE: references/paper_summary.md ---
+--- FILE: references/key_concepts.md ---
+--- FILE: references/code_guide.md ---
+```
+
+Launch as a single Task subagent (always Claude, even in multi-model mode):
+
+```
+Task(subagent_type="general-purpose", prompt="[chairman prompt above]")
+```
+
+---
+
+## Phase 4: Write Skill Files
+
+### Step 4.1: Parse Chairman Output
+
+Split the chairman's response by the file delimiters to extract the 4 files.
+
+### Step 4.2: Determine Skill Directory
+
+Use the paper name (lowercase, hyphens) as the directory name:
+
+```
+skills/<paper-name>/
 ├── SKILL.md
 └── references/
-    ├── paper_summary.md      # Problem, solution, contributions
-    ├── key_concepts.md       # Important concepts and terminology
-    └── code_guide.md         # How to use the implementation
+    ├── paper_summary.md
+    ├── key_concepts.md
+    └── code_guide.md
 ```
 
-#### SKILL.md Template
+### Step 4.3: Write Files
 
-```yaml
+Write each file to the skill directory. Verify that:
+- YAML frontmatter in SKILL.md is valid
+- All internal links between files are correct
+- File paths in code_guide.md reference actual repository files
+
+### Step 4.4: Report Results
+
+Report to the user:
+- Skill directory location
+- Aggregate quality scores from peer review
+- Any disputes or concerns flagged during review
+- Suggestion to review the generated files
+
 ---
-name: <paper-name>
-description: Guide for understanding and applying <paper-title>. Provides structured summary of the paper's problem, solution, and contributions, along with practical guidance for using the implementation code. Use when users ask about <paper-topic>, want to apply <method-name>, or reference this specific paper.
----
 
-# <Paper Title>
-
-Quick reference for understanding and applying the methods from "<Paper Title>" by <Authors>.
-
-## Paper Summary
-
-**Problem**: [Brief 1-2 sentence summary]
-
-**Solution**: [Brief 1-2 sentence summary]
-
-**Key Contribution**: [Main innovation in 1 sentence]
-
-For detailed analysis, see [references/paper_summary.md](references/paper_summary.md).
-
-## Key Concepts
-
-- **Concept 1**: Brief explanation
-- **Concept 2**: Brief explanation
-- **Concept 3**: Brief explanation
-
-For in-depth concept explanations, see [references/key_concepts.md](references/key_concepts.md).
-
-## Using the Implementation
-
-**Repository**: <github-url>
-
-**Quick Start**:
-```bash
-# Clone repository
-git clone <github-url>
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Basic usage
-python train.py --config configs/default.yaml
-```
-
-For detailed code guide and usage patterns, see [references/code_guide.md](references/code_guide.md).
-
-## When to Use This Skill
-
-Use this skill when:
-- Users ask about the paper's method or approach
-- Users want to apply this technique to their research
-- Users need to understand the implementation details
-- Users reference this paper in conversation
-```
-
-#### references/paper_summary.md Template
-
-```markdown
-# Paper Summary: <Paper Title>
-
-## Problem Statement
-
-### Background
-[Detailed context about the problem domain]
-
-### Challenges
-[What makes this problem difficult?]
-
-### Limitations of Prior Work
-[Why existing methods are insufficient]
-
-## Proposed Solution
-
-### Overview
-[High-level description of the approach]
-
-### Key Components
-1. **Component 1**: [Detailed explanation]
-2. **Component 2**: [Detailed explanation]
-3. **Component 3**: [Detailed explanation]
-
-### Technical Details
-[Architecture, algorithm, methodology]
-
-### Innovation
-[What's novel about this approach?]
-
-## Main Contributions
-
-1. **Contribution 1**: [Description and impact]
-2. **Contribution 2**: [Description and impact]
-3. **Contribution 3**: [Description and impact]
-
-## Experimental Results
-
-### Datasets
-[Which datasets were used]
-
-### Performance
-[Key performance metrics and improvements]
-
-### Comparisons
-[How it compares to baselines]
-
-## Practical Implications
-
-[How this work advances the field]
-[Potential applications]
-[Future research directions]
-```
-
-#### references/key_concepts.md Template
-
-```markdown
-# Key Concepts: <Paper Title>
-
-## Core Terminology
-
-### Concept 1
-**Definition**: [Clear definition]
-
-**Context**: [Why it matters in this paper]
-
-**Related Work**: [How it relates to prior concepts]
-
-### Concept 2
-[Same structure as above]
-
-## Mathematical Formulations
-
-### Formula 1: [Name]
-```
-[Mathematical notation]
-```
-
-**Explanation**: [What this formula represents]
-
-**Parameters**:
-- `param1`: [Description]
-- `param2`: [Description]
-
-### Formula 2: [Name]
-[Same structure]
-
-## Relationships to Prior Work
-
-[How concepts build on or differ from previous research]
-```
-
-#### references/code_guide.md Template
-
-```markdown
-# Code Guide: <Paper Title>
-
-**Repository**: <github-url>
-
-## Setup
-
-### Requirements
-```bash
-# Python version
-Python >= X.X
-
-# Install dependencies
-pip install -r requirements.txt
-# or
-conda env create -f environment.yml
-```
-
-### Directory Structure
-```
-repo/
-├── model/           # Model implementation
-├── data/            # Data processing
-├── configs/         # Configuration files
-├── scripts/         # Training/evaluation scripts
-└── notebooks/       # Example notebooks
-```
-
-## Core Components
-
-### Model Implementation
-
-**File**: `path/to/model.py`
-
-**Key Classes**:
-```python
-class ModelName:
-    """Main model implementing the paper's method"""
-
-    def __init__(self, config):
-        # Model initialization
-
-    def forward(self, x):
-        # Forward pass implementation
-```
-
-**Usage**:
-```python
-from model import ModelName
-
-# Initialize model
-model = ModelName(config)
-
-# Use model
-output = model(input_data)
-```
-
-### Training Pipeline
-
-**File**: `path/to/train.py`
-
-**Usage**:
-```bash
-# Basic training
-python train.py --config configs/default.yaml
-
-# Custom training
-python train.py --lr 0.001 --batch-size 32 --epochs 100
-```
-
-**Key Parameters**:
-- `--lr`: Learning rate (default: X)
-- `--batch-size`: Batch size (default: X)
-- `--epochs`: Number of epochs (default: X)
-
-### Evaluation/Inference
-
-**File**: `path/to/eval.py`
-
-**Usage**:
-```bash
-# Evaluate on test set
-python eval.py --checkpoint path/to/model.pth --data test_data/
-
-# Run inference
-python inference.py --input input.png --output output.png
-```
-
-## Example Workflows
-
-### Example 1: Train from Scratch
-```bash
-# Prepare data
-python prepare_data.py --dataset DATASET_NAME
-
-# Train model
-python train.py --config configs/scratch.yaml
-
-# Evaluate
-python eval.py --checkpoint checkpoints/best.pth
-```
-
-### Example 2: Fine-tune Pretrained Model
-```bash
-# Download pretrained weights
-wget <pretrained-url>
-
-# Fine-tune
-python train.py --config configs/finetune.yaml --pretrained model.pth
-```
-
-### Example 3: Using in Your Own Code
-```python
-import torch
-from model import ModelName
-
-# Load pretrained model
-model = ModelName.from_pretrained('path/to/checkpoint')
-model.eval()
-
-# Your custom data
-data = torch.randn(1, 3, 224, 224)
-
-# Inference
-with torch.no_grad():
-    output = model(data)
-```
-
-## Common Patterns
-
-### Pattern 1: [Name]
-[Description and code example]
-
-### Pattern 2: [Name]
-[Description and code example]
-
-## Troubleshooting
-
-### Issue 1
-**Problem**: [Description]
-**Solution**: [How to fix]
-
-### Issue 2
-**Problem**: [Description]
-**Solution**: [How to fix]
-```
-
-### Step 6: Package the Skill
-
-After creating all files, package the skill:
-
-```bash
-python /path/to/skill-creator/scripts/package_skill.py <paper-skill-directory>
-```
-
-This generates a `.skill` file ready for distribution.
-
-## Best Practices
-
-1. **Conciseness**: Keep SKILL.md brief with links to detailed references
-2. **Structure**: Use progressive disclosure - essential info in SKILL.md, details in references
-3. **Examples**: Include concrete code examples in references/code_guide.md
-4. **Clarity**: Write for someone who hasn't read the paper
-5. **Completeness**: Cover both understanding (paper) and application (code)
-
-## Example Usage
-
-User: "Package the ResNet paper and its PyTorch implementation as a skill"
-
-Response workflow:
-1. Request paper PDF path and GitHub URL if not provided
-2. Clone repository: `git clone https://github.com/pytorch/vision`
-3. Read paper with `/pdf` skill
-4. Analyze repository structure
-5. Extract key information (problem, solution, contributions)
-6. Generate skill with paper_summary.md, key_concepts.md, code_guide.md
-7. Package skill for distribution
+## Reference Files
+
+| File | Purpose |
+|------|---------|
+| [analyst-roles.md](references/analyst-roles.md) | Specialist role definitions and prompt templates |
+| [peer-review-protocol.md](references/peer-review-protocol.md) | Anonymized review process and scoring |
+| [synthesis-guide.md](references/synthesis-guide.md) | Chairman instructions for final synthesis |
+| [skill-output-templates.md](references/skill-output-templates.md) | Templates for the 4 generated skill files |
