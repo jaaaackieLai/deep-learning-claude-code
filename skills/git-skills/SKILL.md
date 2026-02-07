@@ -49,6 +49,7 @@ This skill provides a comprehensive reference for commonly used Git commands, or
 ### [進階操作](references/advanced.md)
 進階功能和技巧
 - `git stash` - 暫存工作進度
+- `git worktree` - 平行工作目錄
 - `git rebase` - 變基
 - `git cherry-pick` - 挑選 commit
 - `git tag` - 標籤管理

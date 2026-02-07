@@ -71,6 +71,74 @@ git stash
 git stash pop                      # 恢復原來的變更
 ```
 
+> **提示**：若需要長時間在另一個分支工作，考慮使用 `git worktree`（見下方），
+> 避免 stash 堆積和 pop 時的衝突風險。
+
+---
+
+## git worktree
+
+### 平行工作目錄
+
+Worktree 讓你在**同一個倉庫**中同時 checkout 多個分支到不同目錄，各自獨立運作。
+
+```bash
+# 創建 worktree
+git worktree add <path> <branch>           # 在指定路徑 checkout 分支
+git worktree add ../hotfix hotfix/urgent   # 常見用法：在上層目錄建立
+git worktree add -b <new-branch> <path>    # 創建新分支並建立 worktree
+
+# 查看 worktree
+git worktree list                          # 列出所有 worktree
+
+# 刪除 worktree
+git worktree remove <path>                 # 移除 worktree（工作區必須乾淨）
+git worktree remove --force <path>         # 強制移除（捨棄未提交變更）
+
+# 清理
+git worktree prune                         # 清理已刪除目錄的 worktree 記錄
+```
+
+### Stash vs. Worktree
+
+| 面向 | Stash | Worktree |
+|------|-------|----------|
+| 運作方式 | 暫存變更到堆疊 | 在另一個目錄 checkout 分支 |
+| 同時存取 | 一次只能看一個分支 | 可同時操作多個分支 |
+| 遺忘風險 | stash 容易堆積被遺忘 | 目錄存在，不會遺忘 |
+| 衝突風險 | pop 時可能衝突 | 各 worktree 獨立 |
+| Build cache | 切換分支後可能失效 | 每個目錄獨立保留 |
+| 適用場景 | 短暫中斷（幾分鐘） | 長時間平行開發 |
+
+**何時使用：**
+- **Stash**：臨時離開當前工作，很快回來
+- **Worktree**：需要同時在多個分支工作、code review、跑長時間任務時不想被打斷
+
+**常見場景：**
+```bash
+# 場景 1：邊跑實驗邊修 bug
+git worktree add ../hotfix hotfix/data-loader
+cd ../hotfix
+# 修 bug、提交、推送
+cd ../main-repo
+git worktree remove ../hotfix
+
+# 場景 2：Code review 不中斷當前工作
+git worktree add ../review feature/new-model
+# 在 ../review 查看程式碼
+git worktree remove ../review
+
+# 場景 3：對照兩個分支的輸出
+git worktree add ../experiment-v1 experiment/v1
+git worktree add ../experiment-v2 experiment/v2
+diff ../experiment-v1/results.json ../experiment-v2/results.json
+```
+
+**重要提醒：**
+- 同一個分支不能同時被多個 worktree checkout
+- 所有 worktree 共享同一個 `.git` 歷史（commit、stash、reflog 都共用）
+- 刪除 worktree 目錄前建議用 `git worktree remove`，而非直接 `rm -rf`
+
 ---
 
 ## git rebase

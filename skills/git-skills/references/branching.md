@@ -117,7 +117,7 @@ git merge feature/new-feature
 git branch -d feature/new-feature
 ```
 
-### 快速切換
+### 快速切換（Stash）
 ```bash
 git switch -                       # 切回上一個分支
 git stash                          # 暫存當前變更
@@ -125,6 +125,20 @@ git switch other-branch            # 切換到其他分支
 git switch -                       # 切回來
 git stash pop                      # 恢復暫存的變更
 ```
+
+### 平行開發（Worktree）
+
+需要長時間在另一個分支工作時，worktree 比 stash 更安全。
+
+```bash
+# 在另一個目錄同時 checkout 其他分支
+git worktree add ../hotfix hotfix/urgent
+cd ../hotfix
+# 在這裡修 bug，不影響原本的工作目錄
+git worktree remove ../hotfix      # 完成後清理
+```
+
+> 詳見 [進階操作 - git worktree](advanced.md#git-worktree)
 
 ---
 
