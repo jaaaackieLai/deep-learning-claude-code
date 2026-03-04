@@ -23,7 +23,7 @@ claude plugin add jaaaackieLai/deep-learning-claude-code
 
 ## Skills Guide
 
-This repository includes various skills tailored for deep learning researchers and Python developers. For detailed explanations of each skill category and their usage check [Skills Explanation](docs/en/skill-explain.md).
+This repository includes various skills tailored for deep learning researchers and Python developers. For detailed explanations of each skill category and their usage check [Skills Explanation](docs/en/skill-readme.md).
 
 These guides provide comprehensive information about:
 - Document processing skills (PDF, DOCX, PPTX, XLSX)
@@ -31,7 +31,7 @@ These guides provide comprehensive information about:
 - Superpowers for development workflows
 - Code review and project management tools
 
-## Recommended Official Anthropic Skills
+## Official Anthropic Skills
 
 This repository focuses on custom skills for deep learning researchers. We also recommend adding official Anthropic skills (like document processing, MCP builders, etc.) using the Claude Code plugin system:
 
@@ -41,7 +41,6 @@ claude plugin add anthropic/skills
 
 # Or add specific skill categories
 claude plugin add anthropic/skills/document-skills
-claude plugin add anthropic/skills/example-skills
 ```
 
 Available official Anthropic skill categories:
