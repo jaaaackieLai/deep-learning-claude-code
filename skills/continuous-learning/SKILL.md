@@ -1,6 +1,6 @@
 ---
 name: continuous-learning
-description: Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents.
+description: Help Claude learn and remember your preferences, coding patterns, and workflows across sessions. Use when the user says things like "learn my preferences", "remember how I work", "track my patterns", "adapt to my style", "set up continuous learning", or wants Claude to automatically improve based on their usage. Also use when setting up observation hooks for session tracking or managing learned behaviors.
 ---
 
 # Continuous Learning v2 - Instinct-Based Architecture
