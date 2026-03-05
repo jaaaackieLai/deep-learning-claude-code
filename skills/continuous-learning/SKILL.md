@@ -103,14 +103,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh pre"
+        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning/hooks/observe.sh pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh post"
+        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning/hooks/observe.sh post"
       }]
     }]
   }
@@ -126,14 +126,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh pre"
+        "command": "~/.claude/skills/continuous-learning/hooks/observe.sh pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh post"
+        "command": "~/.claude/skills/continuous-learning/hooks/observe.sh post"
       }]
     }]
   }

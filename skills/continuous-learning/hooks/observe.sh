@@ -1,5 +1,5 @@
 #!/bin/bash
-# Continuous Learning v2 - Observation Hook
+# Continuous Learning - Observation Hook
 #
 # Captures tool use events for pattern analysis.
 # Claude Code passes hook data via stdin as JSON.
@@ -11,11 +11,11 @@
 #   "hooks": {
 #     "PreToolUse": [{
 #       "matcher": "*",
-#       "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh pre" }]
+#       "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/observe.sh pre" }]
 #     }],
 #     "PostToolUse": [{
 #       "matcher": "*",
-#       "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh post" }]
+#       "hooks": [{ "type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/observe.sh post" }]
 #     }]
 #   }
 # }
@@ -25,11 +25,11 @@
 #   "hooks": {
 #     "PreToolUse": [{
 #       "matcher": "*",
-#       "hooks": [{ "type": "command", "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh pre" }]
+#       "hooks": [{ "type": "command", "command": "~/.claude/skills/continuous-learning/hooks/observe.sh pre" }]
 #     }],
 #     "PostToolUse": [{
 #       "matcher": "*",
-#       "hooks": [{ "type": "command", "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh post" }]
+#       "hooks": [{ "type": "command", "command": "~/.claude/skills/continuous-learning/hooks/observe.sh post" }]
 #     }]
 #   }
 # }
@@ -39,6 +39,7 @@ set -e
 CONFIG_DIR="${HOME}/.claude/homunculus"
 OBSERVATIONS_FILE="${CONFIG_DIR}/observations.jsonl"
 MAX_FILE_SIZE_MB=10
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # Ensure directory exists
 mkdir -p "$CONFIG_DIR"
@@ -56,59 +57,7 @@ if [ -z "$INPUT_JSON" ]; then
   exit 0
 fi
 
-# Parse using python (more reliable than jq for complex JSON)
-PARSED=$(python3 << EOF
-import json
-import sys
-
-try:
-    data = json.loads('''$INPUT_JSON''')
-
-    # Extract fields - Claude Code hook format
-    hook_type = data.get('hook_type', 'unknown')  # PreToolUse or PostToolUse
-    tool_name = data.get('tool_name', data.get('tool', 'unknown'))
-    tool_input = data.get('tool_input', data.get('input', {}))
-    tool_output = data.get('tool_output', data.get('output', ''))
-    session_id = data.get('session_id', 'unknown')
-
-    # Truncate large inputs/outputs
-    if isinstance(tool_input, dict):
-        tool_input_str = json.dumps(tool_input)[:5000]
-    else:
-        tool_input_str = str(tool_input)[:5000]
-
-    if isinstance(tool_output, dict):
-        tool_output_str = json.dumps(tool_output)[:5000]
-    else:
-        tool_output_str = str(tool_output)[:5000]
-
-    # Determine event type
-    event = 'tool_start' if 'Pre' in hook_type else 'tool_complete'
-
-    print(json.dumps({
-        'parsed': True,
-        'event': event,
-        'tool': tool_name,
-        'input': tool_input_str if event == 'tool_start' else None,
-        'output': tool_output_str if event == 'tool_complete' else None,
-        'session': session_id
-    }))
-except Exception as e:
-    print(json.dumps({'parsed': False, 'error': str(e)}))
-EOF
-)
-
-# Check if parsing succeeded
-PARSED_OK=$(echo "$PARSED" | python3 -c "import json,sys; print(json.load(sys.stdin).get('parsed', False))")
-
-if [ "$PARSED_OK" != "True" ]; then
-  # Fallback: log raw input for debugging
-  timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-  echo "{\"timestamp\":\"$timestamp\",\"event\":\"parse_error\",\"raw\":$(echo "$INPUT_JSON" | python3 -c 'import json,sys; print(json.dumps(sys.stdin.read()[:1000]))')}" >> "$OBSERVATIONS_FILE"
-  exit 0
-fi
-
-# Archive if file too large
+# Archive if observations file too large
 if [ -f "$OBSERVATIONS_FILE" ]; then
   file_size_mb=$(du -m "$OBSERVATIONS_FILE" 2>/dev/null | cut -f1)
   if [ "${file_size_mb:-0}" -ge "$MAX_FILE_SIZE_MB" ]; then
@@ -118,76 +67,102 @@ if [ -f "$OBSERVATIONS_FILE" ]; then
   fi
 fi
 
-# Build and write observation
-timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-
-python3 << EOF
+# Single Python script: parse input, write observation, detect corrections
+CORRECTION_OUTPUT=$(echo "$INPUT_JSON" | python3 -c "
 import json
+import sys
+from pathlib import Path
+from datetime import datetime, timezone
 
-parsed = json.loads('''$PARSED''')
+config_dir = Path.home() / '.claude' / 'homunculus'
+obs_file = config_dir / 'observations.jsonl'
+clarifications_dir = config_dir / 'clarifications'
+clarifications_dir.mkdir(parents=True, exist_ok=True)
+script_dir = Path('${SCRIPT_DIR}')
+
+# --- Phase 1: Parse input and write observation ---
+try:
+    data = json.load(sys.stdin)
+except Exception as e:
+    # Log parse error and exit
+    timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    with open(obs_file, 'a') as f:
+        f.write(json.dumps({'timestamp': timestamp, 'event': 'parse_error', 'error': str(e)}) + '\n')
+    sys.exit(0)
+
+hook_type = data.get('hook_type', 'unknown')
+tool_name = data.get('tool_name', data.get('tool', 'unknown'))
+tool_input = data.get('tool_input', data.get('input', {}))
+tool_output = data.get('tool_output', data.get('output', ''))
+session_id = data.get('session_id', 'unknown')
+
+# Truncate large inputs/outputs
+if isinstance(tool_input, dict):
+    tool_input_str = json.dumps(tool_input)[:5000]
+else:
+    tool_input_str = str(tool_input)[:5000]
+
+if isinstance(tool_output, dict):
+    tool_output_str = json.dumps(tool_output)[:5000]
+else:
+    tool_output_str = str(tool_output)[:5000]
+
+event = 'tool_start' if 'Pre' in hook_type else 'tool_complete'
+timestamp = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
 observation = {
-    'timestamp': '$timestamp',
-    'event': parsed['event'],
-    'tool': parsed['tool'],
-    'session': parsed['session']
+    'timestamp': timestamp,
+    'event': event,
+    'tool': tool_name,
+    'session': session_id
 }
+if event == 'tool_start' and tool_input_str:
+    observation['input'] = tool_input_str
+if event == 'tool_complete' and tool_output_str:
+    observation['output'] = tool_output_str
 
-if parsed['input']:
-    observation['input'] = parsed['input']
-if parsed['output']:
-    observation['output'] = parsed['output']
-
-with open('$OBSERVATIONS_FILE', 'a') as f:
+with open(obs_file, 'a') as f:
     f.write(json.dumps(observation) + '\n')
-EOF
 
-# Detect potential corrections (heuristic-based)
-# This triggers lightweight analysis when correction patterns are detected
-CORRECTION_DETECTED=false
-
-python3 << 'DETECT_EOF'
-import json
-import sys
-from pathlib import Path
-
-config_dir = Path.home() / ".claude" / "homunculus"
-obs_file = config_dir / "observations.jsonl"
-clarifications_dir = config_dir / "clarifications"
-clarifications_dir.mkdir(parents=True, exist_ok=True)
-
-# Check if clarification detection is enabled
-config_file = Path(__file__).parent.parent / "config.json"
+# --- Phase 2: Detect correction patterns ---
+config_file = script_dir / 'config.json'
 if config_file.exists():
-    config = json.loads(config_file.read_text())
-    if not config.get("clarifications", {}).get("enabled", True):
-        sys.exit(0)
+    try:
+        config = json.loads(config_file.read_text())
+        if not config.get('clarifications', {}).get('enabled', True):
+            sys.exit(0)
+    except Exception:
+        pass
 
-# Read last 10 observations to detect patterns
 if not obs_file.exists():
     sys.exit(0)
 
 observations = []
 with open(obs_file, 'r') as f:
     lines = f.readlines()
-    observations = [json.loads(line) for line in lines[-10:] if line.strip()]
+    for line in lines[-10:]:
+        line = line.strip()
+        if line:
+            try:
+                observations.append(json.loads(line))
+            except Exception:
+                pass
 
 if len(observations) < 2:
     sys.exit(0)
 
-# Detection patterns for potential corrections
 correction_signals = []
 
-# Pattern 1: Rapid re-edit of same file (within 30 seconds)
+# Pattern 1: Rapid re-edit of same file
 edit_events = [(i, obs) for i, obs in enumerate(observations)
                if obs.get('tool') == 'Edit' and obs.get('event') == 'tool_start']
 if len(edit_events) >= 2:
     for i in range(len(edit_events) - 1):
         idx1, obs1 = edit_events[i]
         idx2, obs2 = edit_events[i + 1]
-        # Check if editing same file (simple heuristic: file path in input)
         input1 = obs1.get('input', '')
         input2 = obs2.get('input', '')
-        if input1 and input2 and any(word in input1 and word in input2 for word in ['file_path']):
+        if input1 and input2 and 'file_path' in str(input1) and 'file_path' in str(input2):
             correction_signals.append({
                 'type': 'rapid_re_edit',
                 'confidence': 0.6,
@@ -197,19 +172,18 @@ if len(edit_events) >= 2:
 # Pattern 2: Error followed by success on same tool
 for i in range(len(observations) - 1):
     if observations[i].get('event') == 'tool_complete':
-        output = observations[i].get('output', '')
-        if any(err in str(output).lower() for err in ['error', 'failed', 'exception', 'invalid']):
-            # Check if next few tools succeed
+        output = str(observations[i].get('output', '')).lower()
+        if any(err in output for err in ['error', 'failed', 'exception', 'invalid']):
             if i + 1 < len(observations) and observations[i + 1].get('event') == 'tool_complete':
-                next_output = observations[i + 1].get('output', '')
-                if not any(err in str(next_output).lower() for err in ['error', 'failed']):
+                next_output = str(observations[i + 1].get('output', '')).lower()
+                if not any(err in next_output for err in ['error', 'failed']):
                     correction_signals.append({
                         'type': 'error_then_success',
                         'confidence': 0.7,
                         'observations': [i, i + 1]
                     })
 
-# Pattern 3: Same tool used 3+ times in short sequence (possible iteration/correction)
+# Pattern 3: Same tool used 3+ times in short sequence
 tool_sequence = [obs.get('tool') for obs in observations[-5:]]
 for tool in set(tool_sequence):
     count = tool_sequence.count(tool)
@@ -221,114 +195,21 @@ for tool in set(tool_sequence):
             'count': count
         })
 
-# If corrections detected, trigger analysis
 if correction_signals:
-    trigger_file = clarifications_dir / ".trigger"
+    trigger_file = clarifications_dir / '.trigger'
     with open(trigger_file, 'w') as f:
         json.dump({
             'timestamp': observations[-1].get('timestamp'),
             'session': observations[-1].get('session'),
             'signals': correction_signals
         }, f)
-    print("CORRECTION_DETECTED")
-DETECT_EOF
+    print('CORRECTION_DETECTED')
+" 2>/dev/null || true)
 
-if [ $? -eq 0 ]; then
-  CORRECTION_OUTPUT=$(python3 << 'DETECT_EOF'
-import json
-import sys
-from pathlib import Path
-
-config_dir = Path.home() / ".claude" / "homunculus"
-obs_file = config_dir / "observations.jsonl"
-clarifications_dir = config_dir / "clarifications"
-clarifications_dir.mkdir(parents=True, exist_ok=True)
-
-# Check if clarification detection is enabled
-config_file = Path(__file__).parent.parent / "config.json"
-if config_file.exists():
-    config = json.loads(config_file.read_text())
-    if not config.get("clarifications", {}).get("enabled", True):
-        sys.exit(0)
-
-# Read last 10 observations to detect patterns
-if not obs_file.exists():
-    sys.exit(0)
-
-observations = []
-with open(obs_file, 'r') as f:
-    lines = f.readlines()
-    observations = [json.loads(line) for line in lines[-10:] if line.strip()]
-
-if len(observations) < 2:
-    sys.exit(0)
-
-# Detection patterns for potential corrections
-correction_signals = []
-
-# Pattern 1: Rapid re-edit of same file (within 30 seconds)
-edit_events = [(i, obs) for i, obs in enumerate(observations)
-               if obs.get('tool') == 'Edit' and obs.get('event') == 'tool_start']
-if len(edit_events) >= 2:
-    for i in range(len(edit_events) - 1):
-        idx1, obs1 = edit_events[i]
-        idx2, obs2 = edit_events[i + 1]
-        # Check if editing same file (simple heuristic: file path in input)
-        input1 = obs1.get('input', '')
-        input2 = obs2.get('input', '')
-        if input1 and input2 and any(word in input1 and word in input2 for word in ['file_path']):
-            correction_signals.append({
-                'type': 'rapid_re_edit',
-                'confidence': 0.6,
-                'observations': [idx1, idx2]
-            })
-
-# Pattern 2: Error followed by success on same tool
-for i in range(len(observations) - 1):
-    if observations[i].get('event') == 'tool_complete':
-        output = observations[i].get('output', '')
-        if any(err in str(output).lower() for err in ['error', 'failed', 'exception', 'invalid']):
-            # Check if next few tools succeed
-            if i + 1 < len(observations) and observations[i + 1].get('event') == 'tool_complete':
-                next_output = observations[i + 1].get('output', '')
-                if not any(err in str(next_output).lower() for err in ['error', 'failed']):
-                    correction_signals.append({
-                        'type': 'error_then_success',
-                        'confidence': 0.7,
-                        'observations': [i, i + 1]
-                    })
-
-# Pattern 3: Same tool used 3+ times in short sequence (possible iteration/correction)
-tool_sequence = [obs.get('tool') for obs in observations[-5:]]
-for tool in set(tool_sequence):
-    count = tool_sequence.count(tool)
-    if count >= 3 and tool in ['Edit', 'Write', 'Bash']:
-        correction_signals.append({
-            'type': 'repeated_tool',
-            'confidence': 0.5,
-            'tool': tool,
-            'count': count
-        })
-
-# If corrections detected, trigger analysis
-if correction_signals:
-    trigger_file = clarifications_dir / ".trigger"
-    with open(trigger_file, 'w') as f:
-        json.dump({
-            'timestamp': observations[-1].get('timestamp'),
-            'session': observations[-1].get('session'),
-            'signals': correction_signals
-        }, f)
-    print("CORRECTION_DETECTED")
-DETECT_EOF
-)
-
-  if [ "$CORRECTION_OUTPUT" = "CORRECTION_DETECTED" ]; then
-    # Trigger lightweight analysis in background
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-    if [ -f "$SCRIPT_DIR/scripts/analyze-correction.py" ]; then
-      python3 "$SCRIPT_DIR/scripts/analyze-correction.py" --last-turns 5 &
-    fi
+if [ "$CORRECTION_OUTPUT" = "CORRECTION_DETECTED" ]; then
+  # Trigger lightweight analysis in background
+  if [ -f "$SCRIPT_DIR/scripts/analyze-correction.py" ]; then
+    python3 "$SCRIPT_DIR/scripts/analyze-correction.py" --last-turns 5 &
   fi
 fi
 
