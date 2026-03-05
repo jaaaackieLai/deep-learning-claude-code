@@ -87,5 +87,3 @@ This repository was inspired by the following projects:
 - [anthropics/skills](https://github.com/anthropics/skills) - Official skills repository from Anthropic
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) - The complete collection of Claude Code configs from an Anthropic hackathon winner
 - [obra/superpowers](https://github.com/obra/superpowers) - Superpowers skills collection
-- [K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills/tree/main) - Scientific skills for Claude
-- [muratcankoylan/Agent-Skills-for-Context-Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) - Agent skills for context engineering

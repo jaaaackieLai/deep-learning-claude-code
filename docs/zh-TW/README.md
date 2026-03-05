@@ -87,5 +87,3 @@ claude plugin add anthropic/skills/document-skills
 - [anthropics/skills](https://github.com/anthropics/skills) - Anthropic 官方技能專案
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) - Anthropic 黑客松獲獎者的完整 Claude Code 配置集合
 - [obra/superpowers](https://github.com/obra/superpowers) - Superpowers 技能集合
-- [K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills/tree/main) - Claude 科學技能
-- [muratcankoylan/Agent-Skills-for-Context-Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) - Agent 技能與 Context 工程
