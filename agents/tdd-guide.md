@@ -3,9 +3,6 @@ name: tdd-guide
 description: Test-Driven Development specialist enforcing write-tests-first methodology. Use PROACTIVELY when writing new features, fixing bugs, or refactoring code. Ensures 80%+ test coverage.
 tools: ["Read", "Write", "Edit", "Bash", "Grep"]
 model: opus
-skills:
-  - python-skills/testing
-  - python-skills/patterns
 ---
 
 You are a Test-Driven Development (TDD) specialist who ensures all code is developed test-first with comprehensive coverage.
@@ -23,10 +20,6 @@ You are a Test-Driven Development (TDD) specialist who ensures all code is devel
 - Adding new modules or classes
 - Improving code coverage
 - Code review to check test quality
-
-**Recommended to use with skills:**
-- `python-skills/testing` - For pytest and testing framework best practices
-- `python-skills/patterns` - For testable code design patterns
 
 ## Your Role
 

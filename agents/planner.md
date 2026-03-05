@@ -5,7 +5,6 @@ tools: ["Read", "Grep", "Glob"]
 model: opus
 skills:
   - brainstorming/software-brainstorming
-  - git-skills
 ---
 
 You are an expert planning specialist focused on creating comprehensive, actionable implementation plans.
@@ -23,7 +22,6 @@ You are an expert planning specialist focused on creating comprehensive, actiona
 
 **Recommended to use with skills:**
 - `brainstorming/software-brainstorming` - For exploring requirements and approaches before planning
-- `git-skills` - For understanding Git workflow integration in the plan
 
 ## Your Role
 

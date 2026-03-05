@@ -12,17 +12,15 @@
     {
       "name": "dl-research-toolkit",
       "source": "./",
-      "description": "Toolkit for deep learning researchers: TDD guides, code review agents, and planning commands",
-      "version": "2.0.0",
+      "description": "Toolkit for deep learning researchers: planning, analysis, and TDD agents with brainstorming skills",
+      "version": "2.1.0",
       "author": {
         "name": "jackie"
       },
       "license": "MIT",
       "category": "productivity",
       "agents": [
-        "./agents/architect.md",
-        "./agents/code-reviewer.md",
-        "./agents/doc-updater.md",
+        "./agents/analyzer.md",
         "./agents/planner.md",
         "./agents/tdd-guide.md"
       ],
