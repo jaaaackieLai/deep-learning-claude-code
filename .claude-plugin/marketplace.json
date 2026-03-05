@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Commands, agents, hooks, and skills for Python-based deep learning research workflows",
-    "version": "1.0.0"
+    "version": "2.0.0"
   },
   "plugins": [
     {
       "name": "dl-research-toolkit",
       "source": "./",
-      "description": "Comprehensive toolkit for deep learning researchers using Python, including TDD guides, code review agents, and specialized skills for PyTorch, scientific computing, and context engineering",
-      "version": "1.0.0",
+      "description": "Toolkit for deep learning researchers: TDD guides, code review agents, and planning commands",
+      "version": "2.0.0",
       "author": {
         "name": "jackie"
       },
@@ -36,43 +36,9 @@
       "strict": false
     },
     {
-      "name": "context-engineering-skills",
-      "source": "./skills/context-engineering",
-      "description": "Advanced context engineering skills for optimizing context windows, compression, degradation management, and fundamentals",
-      "version": "1.0.0",
-      "category": "productivity",
-      "strict": false,
-      "skills": [
-        "./context-compression",
-        "./context-degradation",
-        "./context-fundamentals",
-        "./context-optimization"
-      ]
-    },
-    {
-      "name": "python-skills",
-      "source": "./skills/python-skills",
-      "description": "Python library skills for ML/DL research: PyTorch, PyTorch Lightning, scikit-learn, matplotlib, seaborn, networkx, torch-geometric, and more",
-      "version": "1.0.0",
-      "category": "development",
-      "strict": false,
-      "skills": [
-        "./matplotlib",
-        "./networkx",
-        "./patterns",
-        "./pytorch",
-        "./pytorch-lightning",
-        "./scikit-learn",
-        "./seaborn",
-        "./simpy",
-        "./testing",
-        "./torch-geometric"
-      ]
-    },
-    {
       "name": "brainstorming-skills",
       "source": "./skills/brainstorming",
-      "description": "Software and scientific brainstorming skills for exploring ideas, requirements, and design approaches",
+      "description": "Interactive brainstorming skills that guide collaborative idea exploration through structured dialogue — one question at a time, multiple approaches, incremental validation",
       "version": "1.0.0",
       "category": "productivity",
       "strict": false,
@@ -80,22 +46,6 @@
         "./scientific-brainstorming",
         "./software-brainstorming"
       ]
-    },
-    {
-      "name": "git-skills",
-      "source": "./skills/git-skills",
-      "description": "Git workflow and version control skills for research projects",
-      "version": "1.0.0",
-      "category": "development",
-      "strict": false
-    },
-    {
-      "name": "scientific-thinking-skill",
-      "source": "./skills/scientific-critical-thinking",
-      "description": "Scientific critical thinking methodology for systematic evaluation and decision-making",
-      "version": "1.0.0",
-      "category": "productivity",
-      "strict": false
     },
     {
       "name": "paper-council-skill",
