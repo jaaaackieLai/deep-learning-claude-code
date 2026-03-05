@@ -124,25 +124,30 @@ Principle: Small and frequent commits > Large and infrequent commits
 
 ## Agent Strategy
 
-When available, use specialized agents for complex work:
+<agent_auto_dispatch>
+Agents are behavior-shaping tools that change HOW you work, not what you know.
+Automatically delegate to the matching agent when the trigger condition is met -- do not wait for the user to ask.
 
-| Agent | Purpose |
-|-------|---------|
-| planner | Feature implementation planning |
-| architect | System design and architecture |
-| tdd-guide | Test-driven development |
-| code-reviewer | Code review for quality/security |
-| doc-updater | Documentation updates |
+### tdd-guide -- Test-Driven Development
+**Auto-trigger when:** implementing new features, fixing bugs, refactoring code, or any task that produces code.
+**What it does:** Enforces write-tests-first methodology (Red/Green/Refactor). Produces pytest test suites before implementation.
+**Why auto-trigger:** Without this agent, Claude defaults to implementation-first with no tests. This agent flips the order. (Eval: 100% vs 0% baseline)
 
-Modular rules can be extended in `~/.claude/rules/`:
+### planner -- Implementation Planning
+**Auto-trigger when:** user requests a new feature, multi-file change, architectural change, migration, or any task requiring 3+ steps.
+**What it does:** Produces phased implementation plans with numbered steps, dependencies, risk assessment, and testing strategy.
+**Why auto-trigger:** Without this agent, Claude gives informal guides without phases, dependencies, or test plans. (Eval: 100% vs 50% baseline)
 
-| Rule File | Contents |
-|-----------|----------|
-| security.md | Security checks, secret management |
-| coding-style.md | Immutability, file organization, error handling |
-| testing.md | TDD workflow, 80% coverage requirement |
-| git-workflow.md | Commit format, PR workflow |
-| agents.md | Agent orchestration, when to use which agent |
+### analyzer -- Scientific Analysis
+**Auto-trigger when:** user needs to analyze data, debug performance, compare approaches, evaluate experiment results, or understand why something behaves a certain way.
+**What it does:** Enforces one-variable-at-a-time methodology. Produces structured analysis with Setup/Results/Confounds/Recommendation format.
+**Why auto-trigger:** Ensures rigorous experimental thinking -- identifies confounds, recommends isolation experiments, avoids premature conclusions. (Eval: 100% vs 75% baseline)
+
+### Dispatch Rules
+- If a task matches multiple agents, use them in sequence: planner (plan) -> tdd-guide (implement) -> analyzer (evaluate)
+- For independent subtasks, dispatch multiple agents in parallel
+- Agents can be combined with brainstorming skills: planner uses software-brainstorming, analyzer uses scientific-brainstorming
+</agent_auto_dispatch>
 
 ---
 
