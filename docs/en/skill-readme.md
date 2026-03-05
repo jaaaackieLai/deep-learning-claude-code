@@ -4,65 +4,62 @@ This document explains the purpose and use cases of each skill in the marketplac
 
 ---
 
-## 📚 Overview
+## Overview
 
 The Claude Code Marketplace provides a curated collection of skills organized by category. Skills extend Claude's capabilities with specialized knowledge, workflows, and tool integrations tailored for deep learning researchers and Python developers.
 
 ---
 
-## 🔧 Core Skills
+## Brainstorming
 
-### git-skills
+### scientific-brainstorming
 
-**Purpose**: Comprehensive Git version control command reference
+**Purpose**: Structured brainstorming for scientific research
 
 **Use Cases**:
-- Quick lookup for Git commands and syntax
-- Learning Git workflows (Feature Branch, Git Flow, GitHub Flow)
-- Resolving Git problems and conflicts
-- Managing branches, remotes, and repositories
-- Understanding .gitignore configuration
+- Research question formulation
+- Hypothesis generation
+- Experimental design brainstorming
+- Methodology exploration
+- Literature gap identification
+- Interdisciplinary connection discovery
+
+**How It Works**:
+- Guides collaborative idea exploration through structured dialogue
+- One question at a time, multiple approaches
+- Incremental validation of ideas
+- References established brainstorming methods
 
 **Structure**:
-- Modular reference organized by topic
-- 9 focused guides (basics, branching, remote, history, undo, advanced, gitignore, troubleshooting, workflows)
-- Quick command reference in main SKILL.md
+- `SKILL.md` - Main skill definition and workflow
+- `references/brainstorming_methods.md` - Brainstorming methodology reference
 
-**Target Users**: All developers using version control
+**Target Users**: Deep learning researchers, scientists
+
+### software-brainstorming
+
+**Purpose**: Structured brainstorming for software development projects
+
+**Use Cases**:
+- Feature ideation and planning
+- Architecture design exploration
+- Problem-solving for technical challenges
+- API design discussions
+- Technology stack selection
+
+**How It Works**:
+- Explores software design requirements, architecture, and technical constraints
+- Structured dialogue before implementation begins
+- Multiple approach evaluation
+
+**Structure**:
+- `SKILL.md` - Main skill definition and workflow
+
+**Target Users**: Software developers, engineering teams
 
 ---
 
-### scientific-critical-thinking
-
-**Purpose**: Systematic framework for evaluating scientific rigor and research quality
-
-**Use Cases**:
-- Reviewing research papers and methodologies
-- Assessing experimental design validity
-- Identifying biases and confounding factors
-- Evaluating statistical analyses and evidence quality
-- Detecting logical fallacies in scientific arguments
-- Planning rigorous research studies
-
-**Core Capabilities**:
-1. **Methodology Critique** - Evaluate study design and validity
-2. **Bias Detection** - Identify cognitive, selection, measurement, and analysis biases
-3. **Statistical Evaluation** - Assess statistical methods and interpretation
-4. **Evidence Assessment** - Grade evidence quality using GRADE and Cochrane frameworks
-5. **Fallacy Identification** - Detect logical errors in scientific claims
-6. **Research Design** - Guidance for planning rigorous studies
-7. **Claim Evaluation** - Systematically verify scientific claims
-
-**Structure**:
-- Modular guides for each capability
-- Workflow templates (paper review, experiment design, claim verification)
-- Comprehensive reference materials
-
-**Target Users**: Deep learning researchers, scientists, academics
-
----
-
-### paper
+## paper
 
 **Purpose**: Transform research papers and their code repositories into high-quality reusable skills through multi-agent council deliberation
 
@@ -81,7 +78,7 @@ The skill uses a 5-phase council deliberation process:
    - **Analyst A** (Theory & Method): Research methodology, mathematical formulations, experimental design
    - **Analyst B** (Literature & Concepts): Terminology, related work, field positioning, novelty assessment
    - **Analyst C** (Code & Practice): Repository structure, setup guide, usage patterns, reproducibility
-3. **Phase 2 - Anonymized Peer Review**: Each analyst reviews the other two analyses without knowing who produced them (adapted from llm-council's anonymized ranking). Scores on accuracy, completeness, clarity, and usefulness (1-5 scale).
+3. **Phase 2 - Anonymized Peer Review**: Each analyst reviews the other two analyses without knowing who produced them. Scores on accuracy, completeness, clarity, and usefulness (1-5 scale).
 4. **Phase 3 - Chairman Synthesis**: A chairman agent receives all analyses, peer reviews, and quality scores, then synthesizes the best content weighted by aggregate scores.
 5. **Phase 4 - Write Skill Files**: Outputs 4 structured files to `skills/<paper-name>/`:
    - `SKILL.md` - Entry point with summary, key concepts, quick start
@@ -91,7 +88,7 @@ The skill uses a 5-phase council deliberation process:
 
 **Modes**:
 - **Claude-only** (default): All agents run as Claude Task subagents. No external dependencies.
-- **Multi-model** (user-requested): Uses Claude, GPT, and Gemini via MCP servers for true model diversity and better blind spot detection.
+- **Multi-model** (user-requested): Uses Claude, GPT, and Gemini via MCP servers for true model diversity.
 
 **Inputs Required**:
 - Path to the paper PDF file
@@ -108,106 +105,9 @@ The skill uses a 5-phase council deliberation process:
 
 ---
 
-## 🧠 Brainstorming
-
-### software-brainstorming
-
-**Purpose**: Structured brainstorming for software development projects
-
-**Use Cases**:
-- Feature ideation and planning
-- Architecture design exploration
-- Problem-solving for technical challenges
-- API design discussions
-- Technology stack selection
-
-**Target Users**: Software developers, engineering teams
-
-### scientific-brainstorming
-
-**Purpose**: Structured brainstorming for scientific research
-
-**Use Cases**:
-- Research question formulation
-- Experimental design brainstorming
-- Hypothesis generation
-- Methodology exploration
-- Literature gap identification
-
-**Target Users**: Deep learning researchers, scientists
-
----
-
-## 🧮 Context Engineering
-
-Advanced skills for AI agent developers (for future agent development).
-
-### context-fundamentals
-
-**Purpose**: Foundational concepts of context engineering for AI systems
-
-**Concepts Covered**:
-- Context anatomy (system prompts, tools, messages, observations)
-- Attention mechanics and context windows
-- Progressive disclosure principles
-- Context quality vs. quantity
-
-### context-compression
-
-**Purpose**: Strategies for compressing context in long-running sessions
-
-**Techniques**:
-- Anchored iterative summarization
-- Structured summary generation
-- Tokens-per-task optimization
-- Artifact trail management
-
-### context-degradation
-
-**Purpose**: Understanding and mitigating context failure patterns
-
-**Patterns Covered**:
-- Lost-in-middle phenomenon
-- Context poisoning
-- Context distraction and confusion
-- Model-specific degradation thresholds
-
-### context-optimization
-
-**Purpose**: Techniques for extending effective context capacity
-
-**Methods**:
-- Compaction strategies
-- Observation masking
-- KV-cache optimization
-- Context partitioning
-
-**Target Users**: Future use when building AI agents
-
----
-
-## 🐍 python-skills
-
-**Purpose**: Python programming best practices and utilities
-
-**Status**: To be documented (structure pending)
-
-**Expected Use Cases**:
-- Python coding conventions
-- Library usage patterns
-- Testing frameworks
-- Debugging techniques
-- Data processing workflows
-
-**Target Users**: Deep learning researchers, Python developers
-
----
-
-## 🔄 continuous-learning
+## continuous-learning
 
 **Purpose**: Real-time misunderstanding detection and communication optimization system
-
-**Status**: ✅ **Implemented (Approach 3: Incremental Real-time Capture)**
 
 **Core Features**:
 - **Real-time Misunderstanding Detection**: Automatically captures corrections as they happen
@@ -232,7 +132,7 @@ Advanced skills for AI agent developers (for future agent development).
 | Approach | Cost per Analysis | Trigger | Efficiency |
 |----------|------------------|---------|------------|
 | Traditional | 6-23K tokens | Manual | Baseline |
-| **Approach 3** | **1-2.5K tokens** | **Automatic** | **5-10x** |
+| **This system** | **1-2.5K tokens** | **Automatic** | **5-10x** |
 
 **Usage**:
 1. Configure hooks (see `skills/continuous-learning/USAGE_GUIDE.md`)
@@ -240,74 +140,49 @@ Advanced skills for AI agent developers (for future agent development).
 3. View generated hints: `~/.claude/homunculus/clarifications/`
 4. Test functionality: `python3 skills/continuous-learning/scripts/test-clarification.py`
 
-**Example Output**:
-```yaml
----
-id: rapid_re_edit-20250204
-trigger: "when editing files multiple times"
-confidence: 0.70
-type: disambiguation
----
-
-When user says "refactor", clarify: "Structural change or rename only?"
-
-Evidence:
-- Rapid tool iteration: Edit → Edit → Edit
-```
+**Structure**:
+- `SKILL.md` - Skill description and entry point
+- `USAGE_GUIDE.md` - Complete setup and usage guide
+- `agents/observer.md` - Background observer agent
+- `hooks/observe.sh` - Observation hook script
+- `scripts/` - Analysis and testing scripts
+- `config.json` - Configuration
 
 **Target Users**: All users who want to reduce communication overhead
 
-**Documentation**:
-- Complete guide: `skills/continuous-learning/USAGE_GUIDE.md`
-- Skill description: `skills/continuous-learning/SKILL.md`
-- Test script: `skills/continuous-learning/scripts/test-clarification.py`
+---
+
+## Summary Table
+
+| Skill Category | Skills | Status | Target Audience |
+|----------------|--------|--------|-----------------|
+| **Brainstorming** | scientific-brainstorming, software-brainstorming | Available | Developers, researchers |
+| **Research** | paper | Available | Deep learning researchers |
+| **Learning** | continuous-learning | Available | All users |
 
 ---
 
-## 📋 Summary Table
-
-| Skill Category | Skills | Source | Status | Target Audience |
-|----------------|--------|--------|--------|-----------------|
-| **Version Control** | git-skills | Custom | ✅ Complete | All developers |
-| **Research** | scientific-critical-thinking, paper | Custom | ✅ Complete | Researchers, scientists |
-| **Brainstorming** | software-brainstorming, scientific-brainstorming | Custom | ✅ Available | Developers, researchers |
-| **Context Engineering** | fundamentals, compression, degradation, optimization | Custom | ✅ Available | Future agent development |
-| **Programming** | python-skills | Custom | 📝 Pending docs | Python developers |
-| **Learning** | continuous-learning | Custom | ✅ Implemented | All users |
-
----
-
-## 🎯 Getting Started
+## Getting Started
 
 ### For Deep Learning Researchers
 
 **Recommended Skills**:
-1. **scientific-critical-thinking** - For reviewing papers and designing experiments
-2. **paper** - Transform papers and code repos into reusable skill references
-3. **git-skills** - For version control of code and experiments
-4. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
+1. **paper** - Transform papers and code repos into reusable skill references
+2. **scientific-brainstorming** - For generating research hypotheses and experimental ideas
+3. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
 
 ### For Software Developers
 
 **Recommended Skills**:
-1. **git-skills** - Essential for version control
-2. **software-brainstorming** - For feature planning and architecture
-3. **continuous-learning** - Automatically learns your communication patterns, reduces overhead
-
-### For Advanced Users
-
-**Recommended Skills**:
-1. **context-engineering** - For future agent development
-2. **continuous-learning** - Automated misunderstanding detection and communication optimization
+1. **software-brainstorming** - For feature planning and architecture exploration
+2. **continuous-learning** - Automatically learns your communication patterns, reduces overhead
 
 ---
 
-## 📖 Documentation
+## Documentation
 
 Each skill includes:
 - **SKILL.md** - Main documentation and entry point
-- **Guides** - Detailed how-to guides (where applicable)
-- **References** - Comprehensive reference materials
-- **Workflows** - Step-by-step workflow templates (where applicable)
+- **References** - Comprehensive reference materials (where applicable)
 
 For specific skill usage, refer to the individual SKILL.md files in the `skills/` directory.

@@ -1,7 +1,7 @@
 **Language:** English | [繁體中文](docs/zh-TW/README.md)
 
 # Deep-learning-claude-code
-This repository includes commands, hooks, agents, and skills, which I commonly use.
+This repository includes commands, agents, and skills, which I commonly use.
 
 I hope that this repo can help software engineers who use Python in deep learning work, and other settings can make your work flow more smoothly.
 
@@ -21,15 +21,46 @@ You can install this plugin marketplace in two ways:
 claude plugin add jaaaackieLai/deep-learning-claude-code
 ```
 
-## Skills Guide
+## What's Included
 
-This repository includes various skills tailored for deep learning researchers and Python developers. For detailed explanations of each skill category and their usage check [Skills Explanation](docs/en/skill-readme.md).
+### Agents
 
-These guides provide comprehensive information about:
-- Document processing skills (PDF, DOCX, PPTX, XLSX)
-- Context engineering fundamentals
-- Superpowers for development workflows
-- Code review and project management tools
+Specialized agents that change how Claude works on your tasks:
+
+| Agent | Purpose |
+|-------|---------|
+| **planner** | Creates phased implementation plans with dependencies and risk assessment |
+| **tdd-guide** | Enforces test-driven development (Red/Green/Refactor) with 80%+ coverage |
+| **analyzer** | Systematic analysis using one-variable-at-a-time methodology |
+
+See [Agent Guide](docs/en/agent-readme.md) for details.
+
+### Commands
+
+Slash commands for common workflows:
+
+| Command | Purpose |
+|---------|---------|
+| `/plan` | Create an implementation plan before coding |
+| `/tdd` | Start a TDD session with test-first methodology |
+| `/test-coverage` | Analyze coverage and generate missing tests |
+| `/update-codemaps` | Scan codebase and update architecture docs |
+| `/update-docs` | Sync documentation from source-of-truth |
+
+See [Command Guide](docs/en/command-readme.md) for details.
+
+### Skills
+
+Extend Claude's capabilities with specialized knowledge:
+
+| Skill | Purpose |
+|-------|---------|
+| **scientific-brainstorming** | Structured brainstorming for research hypotheses and experimental design |
+| **software-brainstorming** | Structured brainstorming for software architecture and feature planning |
+| **paper** | Transform research papers and code repos into reusable skill references via multi-agent council |
+| **continuous-learning** | Real-time misunderstanding detection and communication optimization |
+
+See [Skill Guide](docs/en/skill-readme.md) for details.
 
 ## Official Anthropic Skills
 
@@ -58,4 +89,3 @@ This repository was inspired by the following projects:
 - [obra/superpowers](https://github.com/obra/superpowers) - Superpowers skills collection
 - [K-Dense-AI/claude-scientific-skills](https://github.com/K-Dense-AI/claude-scientific-skills/tree/main) - Scientific skills for Claude
 - [muratcankoylan/Agent-Skills-for-Context-Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) - Agent skills for context engineering
-

@@ -1,7 +1,7 @@
 **語言：** [English](../../README.md) | 繁體中文
 
 # Deep-learning-claude-code
-本專案包含我常用的 commands、hooks、agents 和 skills。
+本專案包含我常用的 commands、agents 和 skills。
 
 希望此專案能幫助使用 Python 進行深度學習工作的軟體工程師，以及其他設定能使你的工作流程更加順暢。
 
@@ -21,15 +21,46 @@
 claude plugin add jaaaackieLai/deep-learning-claude-code
 ```
 
-## 技能指南
+## 包含內容
 
-本專案包含為深度學習研究人員和 Python 開發者量身打造的各種技能。如需了解每個技能類別的詳細說明及使用方法，請查看[技能說明](./skill-readme.md)。
+### 代理程式 (Agents)
 
-這些指南提供全面的資訊，包括：
-- 文檔處理技能（PDF、DOCX、PPTX、XLSX）
-- 上下文工程基礎
-- 開發工作流程的超能力
-- 程式碼審查和專案管理工具
+改變 Claude 工作方式的專業代理：
+
+| 代理 | 用途 |
+|------|------|
+| **planner** | 建立含依賴關係和風險評估的分階段實作計畫 |
+| **tdd-guide** | 執行測試驅動開發（Red/Green/Refactor），確保 80%+ 覆蓋率 |
+| **analyzer** | 使用一次變更一個變數的方法論進行系統性分析 |
+
+詳見[代理程式指南](./agent-readme.md)。
+
+### 命令 (Commands)
+
+常用工作流程的斜線命令：
+
+| 命令 | 用途 |
+|------|------|
+| `/plan` | 在撰寫程式碼前建立實作計畫 |
+| `/tdd` | 以測試優先的方法啟動 TDD 會話 |
+| `/test-coverage` | 分析覆蓋率並生成缺失的測試 |
+| `/update-codemaps` | 掃描程式碼庫並更新架構文件 |
+| `/update-docs` | 從真實來源同步文件 |
+
+詳見[命令指南](./command-readme.md)。
+
+### 技能 (Skills)
+
+以專業知識擴展 Claude 的能力：
+
+| 技能 | 用途 |
+|------|------|
+| **scientific-brainstorming** | 研究假設和實驗設計的結構化腦力激盪 |
+| **software-brainstorming** | 軟體架構和功能規劃的結構化腦力激盪 |
+| **paper** | 透過多代理 council 將研究論文和程式碼倉庫轉化為可重用的技能參考 |
+| **continuous-learning** | 即時誤解檢測和溝通優化 |
+
+詳見[技能指南](./skill-readme.md)。
 
 ## 建議添加 Anthropic 官方技能
 
@@ -41,7 +72,6 @@ claude plugin add anthropic/skills
 
 # 或添加特定技能類別
 claude plugin add anthropic/skills/document-skills
-claude plugin add anthropic/skills/example-skills
 ```
 
 可用的 Anthropic 官方技能類別：
