@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Claude Code Status Line — pure bash + jq, no Python dependency
-# Displays: [Model] dir | context bar | 5h rate | 7d rate | cost duration lines
+# Displays: [Model] dir | Context bar | 5h bar reset | 7d bar reset
 
 set -euo pipefail
 
@@ -31,8 +31,10 @@ progress_bar() {
   local filled=$(( pct * segs / 100 ))
   (( filled > segs )) && filled=$segs
   local empty=$(( segs - filled ))
-  printf '%s%s' "$(printf '%.0s█' $(seq 1 "$filled") 2>/dev/null)" \
-                "$(printf '%.0s▁' $(seq 1 "$empty")  2>/dev/null)"
+  local out=""
+  (( filled > 0 )) && out+=$(printf '%.0s█' $(seq 1 "$filled"))
+  (( empty > 0 ))  && out+=$(printf '%.0s▁' $(seq 1 "$empty"))
+  printf '%s' "$out"
 }
 
 seconds_until() {
@@ -69,10 +71,8 @@ rl5_reset=$(jq_raw '.rate_limits.five_hour.resets_at')
 rl7_pct=$(jq_raw '.rate_limits.seven_day.used_percentage')
 rl7_reset=$(jq_raw '.rate_limits.seven_day.resets_at')
 
-cost_usd=$(jq_num '.cost.total_cost_usd')
-duration_ms=$(jq_num '.cost.total_duration_ms')
-lines_add=$(jq_num '.cost.total_lines_added')
-lines_del=$(jq_num '.cost.total_lines_removed')
+rl5_int=$(printf '%.0f' "${rl5_pct:-0}" 2>/dev/null || echo 0)
+rl7_int=$(printf '%.0f' "${rl7_pct:-0}" 2>/dev/null || echo 0)
 
 # -- model + directory --------------------------------------------------------
 
@@ -106,71 +106,29 @@ ctx_alert=""
 # -- rate limits --------------------------------------------------------------
 
 format_rate() {
-  local label=$1 pct_raw=$2 reset_raw=$3 time_style=${4:-short}
-  if [ -z "$pct_raw" ]; then
-    return
-  fi
-  local pct_int
-  pct_int=$(printf '%.0f' "$pct_raw" 2>/dev/null || echo 0)
+  local label=$1 pct_int=$2 reset_raw=$3 time_style=${4:-short}
   local c
   c=$(color_by_pct "$pct_int")
+  local bar
+  bar=$(progress_bar "$pct_int")
   local reset_str=""
   if [ -n "$reset_raw" ] && [ "$reset_raw" != "0" ]; then
     reset_str=" $(seconds_until "$reset_raw" "$time_style")"
   fi
-  printf '%b%s:%d%%%s%b' "$c" "$label" "$pct_int" "$reset_str" "$RST"
+  printf '%s %b%s%b %d%%%s' "$label" "$c" "$bar" "$RST" "$pct_int" "$reset_str"
 }
 
-rl5_str=$(format_rate "5h" "$rl5_pct" "$rl5_reset")
-rl7_str=$(format_rate "7d" "$rl7_pct" "$rl7_reset" "days")
-
-# -- session metrics ----------------------------------------------------------
-
-metrics=""
-
-if (( $(echo "$cost_usd > 0" | bc -l 2>/dev/null || echo 0) )); then
-  if   (( $(echo "$cost_usd >= 0.10" | bc -l) )); then mc=$RED
-  elif (( $(echo "$cost_usd >= 0.05" | bc -l) )); then mc=$YEL
-  else mc=$GRN; fi
-  cost_str=$(printf '$%.3f' "$cost_usd")
-  metrics+="${mc}${cost_str}${RST}"
-fi
-
-if (( duration_ms > 0 )); then
-  mins=$(( duration_ms / 60000 ))
-  if (( mins >= 30 )); then dc=$YEL; else dc=$GRN; fi
-  if (( mins < 1 )); then dur_str="$((duration_ms / 1000))s"
-  else dur_str="${mins}m"; fi
-  [ -n "$metrics" ] && metrics+=" "
-  metrics+="${dc}${dur_str}${RST}"
-fi
-
-net_lines=$(( lines_add - lines_del ))
-if (( lines_add > 0 || lines_del > 0 )); then
-  if   (( net_lines > 0 )); then lc=$GRN
-  elif (( net_lines < 0 )); then lc=$RED
-  else lc=$YEL; fi
-  sign=""; (( net_lines >= 0 )) && sign="+"
-  [ -n "$metrics" ] && metrics+=" "
-  metrics+="${lc}${sign}${net_lines}L${RST}"
-fi
+rl5_str=$(format_rate "5h" "$rl5_int" "$rl5_reset")
+rl7_str=$(format_rate "7d" "$rl7_int" "$rl7_reset" "days")
 
 # -- assemble -----------------------------------------------------------------
 
 sep="${DIM}|${RST}"
 
 out="${model_color}[${model}]${RST}"
-out+=" 📁 ${YEL}${dir_display}${RST}"
-out+=" ${sep} ${ctx_color}${ctx_bar}${RST} ${ctx_int}%${ctx_alert}"
-
-if [ -n "$rl5_str" ] || [ -n "$rl7_str" ]; then
-  out+=" ${sep}"
-  [ -n "$rl5_str" ] && out+=" ${rl5_str}"
-  [ -n "$rl7_str" ] && out+=" ${rl7_str}"
-fi
-
-if [ -n "$metrics" ]; then
-  out+=" ${sep} ${metrics}"
-fi
+out+=" ${YEL}${dir_display}${RST}"
+out+=" ${sep} Context ${ctx_color}${ctx_bar}${RST} ${ctx_int}%${ctx_alert}"
+out+=" ${sep} ${rl5_str}"
+out+=" ${sep} ${rl7_str}"
 
 printf '%b\n' "$out"

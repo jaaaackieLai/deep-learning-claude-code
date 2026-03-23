@@ -67,10 +67,10 @@ See [Skill Guide](docs/en/skill-readme.md) for details.
 A custom status line script (`claude-settings/statusline.sh`) that displays real-time session info:
 
 ```
-[Opus] 📁 my-project | ████▁▁▁▁ 45% | 5h:23% 2h04m | 7d:41% 5d12h | $0.012 3m +15L
+[Opus 4.6] my-project | Context ███▁▁▁▁▁ 42% | 5h ▁▁▁▁▁▁▁▁ 12% 3h01m | 7d ▁▁▁▁▁▁▁▁ 5% 2d1h
 ```
 
-**What it shows:** model name, working directory, context window usage bar, 5-hour/7-day rate limits with reset timers, session cost, duration, and net lines changed.
+**What it shows:** model name, working directory, context window usage bar, 5-hour/7-day rate limits with progress bars and reset timers.
 
 **Setup:**
 
@@ -90,7 +90,7 @@ A custom status line script (`claude-settings/statusline.sh`) that displays real
    }
    ```
 
-**Requirements:** `bash`, `jq`, `bc`
+**Requirements:** `bash`, `jq`
 
 ## Official Anthropic Skills
 
