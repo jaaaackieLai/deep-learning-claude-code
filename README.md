@@ -62,6 +62,36 @@ Extend Claude's capabilities with specialized knowledge:
 
 See [Skill Guide](docs/en/skill-readme.md) for details.
 
+### Status Line
+
+A custom status line script (`claude-settings/statusline.sh`) that displays real-time session info:
+
+```
+[Opus] 📁 my-project | ████▁▁▁▁ 45% | 5h:23% 2h04m | 7d:41% 5d12h | $0.012 3m +15L
+```
+
+**What it shows:** model name, working directory, context window usage bar, 5-hour/7-day rate limits with reset timers, session cost, duration, and net lines changed.
+
+**Setup:**
+
+1. Copy the script to your Claude config directory:
+   ```bash
+   cp claude-settings/statusline.sh ~/.claude/statusline.sh
+   chmod +x ~/.claude/statusline.sh
+   ```
+
+2. Add to your `~/.claude/settings.json`:
+   ```json
+   {
+     "statusLine": {
+       "type": "command",
+       "command": "bash ~/.claude/statusline.sh"
+     }
+   }
+   ```
+
+**Requirements:** `bash`, `jq`, `bc`
+
 ## Official Anthropic Skills
 
 This repository focuses on custom skills for deep learning researchers. We also recommend adding official Anthropic skills (like document processing, MCP builders, etc.) using the Claude Code plugin system:
