@@ -1,17 +1,35 @@
 #!/usr/bin/env bash
-# Claude Code Status Line — pure bash + jq, no Python dependency
-# Displays: [Model] dir | Context bar | 5h bar reset | 7d bar reset
+# Claude Code Status Line — true color (24-bit RGB) + Nerd Font edition
+# Line 1: [Model] dir | Context bar
+# Line 2: 5h rate limit | 7d rate limit
+# Requires: jq, terminal with true color support, Nerd Font (optional)
 
 set -euo pipefail
 
-RST="\033[0m"
-RED="\033[31m"
-YEL="\033[33m"
-GRN="\033[32m"
-BLU="\033[94m"
-LRED="\033[91m"
-BOLD_RED="\033[31;1m"
-DIM="\033[90m"
+RST=$'\033[0m'
+
+# -- color palette (literal escape sequences) ---------------------------------
+
+C_GREEN=$'\033[38;2;80;250;123m'     # #50FA7B
+C_YELLOW=$'\033[38;2;241;250;140m'   # #F1FA8C
+C_ORANGE=$'\033[38;2;255;184;108m'   # #FFB86C
+C_RED=$'\033[38;2;255;85;85m'        # #FF5555
+
+C_MODEL=$'\033[38;2;189;147;249m'    # #BD93F9 purple
+C_DIR=$'\033[38;2;241;250;140m'      # #F1FA8C yellow
+C_ICON=$'\033[38;2;248;248;242m'     # #F8F8F2 bright white
+C_SEP=$'\033[38;2;68;71;90m'         # #44475A separator
+
+BG_MODEL=$'\033[48;2;30;31;40m'      # #1E1F28 minimal badge
+
+# -- Nerd Font icons ----------------------------------------------------------
+# Customize these if your font renders them differently
+
+ICO_MODEL=$'\u2604'            # ☄ comet
+ICO_DIR=$'\U0001F4C2'         # 📂 open folder
+ICO_CTX=$'\U0001F5C4'         # 🗄 file cabinet
+ICO_5H=$'\u23F3'              # ⏳ hourglass
+ICO_7D=$'\U0001F4C5'          # 📅 calendar
 
 input=$(cat)
 
@@ -19,29 +37,27 @@ input=$(cat)
 
 color_by_pct() {
   local pct_int=${1:-0}
-  if   (( pct_int >= 90 )); then printf '%b' "$RED"
-  elif (( pct_int >= 75 )); then printf '%b' "$LRED"
-  elif (( pct_int >= 50 )); then printf '%b' "$YEL"
-  else                           printf '%b' "$GRN"
+  if   (( pct_int >= 90 )); then printf '%s' "$C_RED"
+  elif (( pct_int >= 75 )); then printf '%s' "$C_ORANGE"
+  elif (( pct_int >= 50 )); then printf '%s' "$C_YELLOW"
+  else                           printf '%s' "$C_GREEN"
   fi
 }
 
-progress_bar() {
-  local pct=${1:-0} segs=8
+gauge_bar() {
+  local pct=${1:-0} segs=${2:-10} filled_char=${3:-●} empty_char=${4:-○}
   local filled=$(( pct * segs / 100 ))
   (( filled > segs )) && filled=$segs
   local empty=$(( segs - filled ))
-  local out=""
-  (( filled > 0 )) && out+=$(printf '%.0s█' $(seq 1 "$filled"))
-  (( empty > 0 ))  && out+=$(printf '%.0s▁' $(seq 1 "$empty"))
+  local out="" i
+  for (( i=0; i<filled; i++ )); do out+="$filled_char"; done
+  for (( i=0; i<empty; i++ )); do out+="$empty_char"; done
   printf '%s' "$out"
 }
 
 seconds_until() {
   local reset_epoch=${1:-0} style=${2:-short}
-  local now
-  now=$(date +%s)
-  local diff=$(( reset_epoch - now ))
+  local diff=$(( reset_epoch - NOW ))
   (( diff < 0 )) && diff=0
   if [ "$style" = "days" ] && (( diff >= 86400 )); then
     printf '%dd%dh' $(( diff / 86400 )) $(( (diff % 86400) / 3600 ))
@@ -54,43 +70,37 @@ seconds_until() {
   fi
 }
 
-jq_raw() { echo "$input" | jq -r "$1 // empty"; }
-jq_num() { echo "$input" | jq -r "$1 // 0"; }
+# -- extract all fields in a single jq call -----------------------------------
 
-# -- extract fields -----------------------------------------------------------
+IFS=$'\x1f' read -r model cur_dir proj_dir ctx_int rl5_int rl5_reset rl7_int rl7_reset < <(
+  echo "$input" | jq -r '[
+    (.model.display_name // "Claude"),
+    (.workspace.current_dir // ""),
+    (.workspace.project_dir // ""),
+    (.context_window.used_percentage // 0 | round),
+    (.rate_limits.five_hour.used_percentage // 0 | round),
+    (.rate_limits.five_hour.resets_at // 0),
+    (.rate_limits.seven_day.used_percentage // 0 | round),
+    (.rate_limits.seven_day.resets_at // 0)
+  ] | join("\u001f")'
+)
 
-model=$(jq_raw '.model.display_name')
-cur_dir=$(jq_raw '.workspace.current_dir')
-proj_dir=$(jq_raw '.workspace.project_dir')
+NOW=$(date +%s)
 
-ctx_pct=$(jq_num '.context_window.used_percentage')
-ctx_int=$(printf '%.0f' "$ctx_pct" 2>/dev/null || echo 0)
-
-rl5_pct=$(jq_raw '.rate_limits.five_hour.used_percentage')
-rl5_reset=$(jq_raw '.rate_limits.five_hour.resets_at')
-rl7_pct=$(jq_raw '.rate_limits.seven_day.used_percentage')
-rl7_reset=$(jq_raw '.rate_limits.seven_day.resets_at')
-
-rl5_int=$(printf '%.0f' "${rl5_pct:-0}" 2>/dev/null || echo 0)
-rl7_int=$(printf '%.0f' "${rl7_pct:-0}" 2>/dev/null || echo 0)
-
-# -- model + directory --------------------------------------------------------
-
-model_color=$(color_by_pct "$ctx_int")
-[ -z "$model" ] && model="Claude"
+# -- directory ----------------------------------------------------------------
 
 dir_display=""
 if [ -n "$cur_dir" ] && [ -n "$proj_dir" ]; then
   case "$cur_dir" in
     "$proj_dir"*) dir_display="${cur_dir#"$proj_dir"}"
                   dir_display="${dir_display#/}"
-                  [ -z "$dir_display" ] && dir_display=$(basename "$proj_dir") ;;
-    *)            dir_display=$(basename "$cur_dir") ;;
+                  [ -z "$dir_display" ] && dir_display="${proj_dir##*/}" ;;
+    *)            dir_display="${cur_dir##*/}" ;;
   esac
 elif [ -n "$proj_dir" ]; then
-  dir_display=$(basename "$proj_dir")
+  dir_display="${proj_dir##*/}"
 elif [ -n "$cur_dir" ]; then
-  dir_display=$(basename "$cur_dir")
+  dir_display="${cur_dir##*/}"
 else
   dir_display="?"
 fi
@@ -98,7 +108,7 @@ fi
 # -- context bar --------------------------------------------------------------
 
 ctx_color=$(color_by_pct "$ctx_int")
-ctx_bar=$(progress_bar "$ctx_int")
+ctx_bar=$(gauge_bar "$ctx_int" 8 "█" "▁")
 ctx_alert=""
 (( ctx_int >= 95 )) && ctx_alert=" CRIT"
 (( ctx_int >= 90 && ctx_int < 95 )) && ctx_alert=" HIGH"
@@ -106,29 +116,28 @@ ctx_alert=""
 # -- rate limits --------------------------------------------------------------
 
 format_rate() {
-  local label=$1 pct_int=$2 reset_raw=$3 time_style=${4:-short}
-  local c
+  local icon=$1 pct_int=$2 reset_raw=$3 time_style=${4:-short}
+  local c bar reset_str=""
   c=$(color_by_pct "$pct_int")
-  local bar
-  bar=$(progress_bar "$pct_int")
-  local reset_str=""
+  bar=$(gauge_bar "$pct_int")
   if [ -n "$reset_raw" ] && [ "$reset_raw" != "0" ]; then
     reset_str=" $(seconds_until "$reset_raw" "$time_style")"
   fi
-  printf '%s %b%s%b %d%%%s' "$label" "$c" "$bar" "$RST" "$pct_int" "$reset_str"
+  printf '%b%s%b %b%s %d%%%b%s' "$C_ICON" "$icon" "$RST" "$c" "$bar" "$pct_int" "$RST" "$reset_str"
 }
 
-rl5_str=$(format_rate "5h" "$rl5_int" "$rl5_reset")
-rl7_str=$(format_rate "7d" "$rl7_int" "$rl7_reset" "days")
+rl5_str=$(format_rate "$ICO_5H" "$rl5_int" "$rl5_reset")
+rl7_str=$(format_rate "$ICO_7D" "$rl7_int" "$rl7_reset" "days")
 
 # -- assemble -----------------------------------------------------------------
 
-sep="${DIM}|${RST}"
+sep=" ${C_SEP}|${RST} "
 
-out="${model_color}[${model}]${RST}"
-out+=" ${YEL}${dir_display}${RST}"
-out+=" ${sep} Context ${ctx_color}${ctx_bar}${RST} ${ctx_int}%${ctx_alert}"
-out+=" ${sep} ${rl5_str}"
-out+=" ${sep} ${rl7_str}"
+line1="${BG_MODEL}${C_MODEL} ${ICO_MODEL} ${model} ${RST}"
+line1+=" ${C_DIR}${ICO_DIR} ${dir_display}${RST}"
+line1+="${sep}${C_ICON}${ICO_CTX}${RST} ${ctx_color}${ctx_bar} ${ctx_int}%${RST}${ctx_alert}"
 
-printf '%b\n' "$out"
+line2="${rl5_str}"
+line2+="${sep}${rl7_str}"
+
+printf '%b\n%b\n' "$line1" "$line2"
