@@ -10,13 +10,13 @@ RST=$'\033[0m'
 
 # -- color palette (literal escape sequences) ---------------------------------
 
-C_GREEN=$'\033[38;2;80;250;123m'     # #50FA7B
+C_GREEN=$'\033[38;2;62;184;89m'      # #3EB859
 C_YELLOW=$'\033[38;2;241;250;140m'   # #F1FA8C
 C_ORANGE=$'\033[38;2;255;184;108m'   # #FFB86C
 C_RED=$'\033[38;2;255;85;85m'        # #FF5555
 
-C_MODEL=$'\033[38;2;189;147;249m'    # #BD93F9 purple
-C_DIR=$'\033[38;2;241;250;140m'      # #F1FA8C yellow
+C_MODEL=$'\033[1;38;2;189;147;249m'    # #BD93F9 purple
+C_DIR=$'\033[1;38;2;137;124;128m'      # #897C80 brown
 C_ICON=$'\033[38;2;248;248;242m'     # #F8F8F2 bright white
 C_SEP=$'\033[38;2;68;71;90m'         # #44475A separator
 
@@ -25,20 +25,29 @@ BG_MODEL=$'\033[48;2;30;31;40m'      # #1E1F28 minimal badge
 # -- Nerd Font icons ----------------------------------------------------------
 # Customize these if your font renders them differently
 
-ICO_MODEL=$'\u2604'            # ☄ comet
+ICO_MODEL=$'\U0001F916'       # 🤖 robot face
 ICO_DIR=$'\U0001F4C2'         # 📂 open folder
-ICO_CTX=$'\U0001F5C4'         # 🗄 file cabinet
-ICO_5H=$'\u23F3'              # ⏳ hourglass
+ICO_CTX=$'\U0001F5C4\uFE0F'   # 🗄️ file cabinet
+ICO_5H=$'\U000023F3'          # ⏳ hourglass
 ICO_7D=$'\U0001F4C5'          # 📅 calendar
 
 input=$(cat)
 
 # -- helpers ------------------------------------------------------------------
 
-color_by_pct() {
+color_ctx_pct() {
+  local pct_int=${1:-0}
+  if   (( pct_int >= 75 )); then printf '%s' "$C_RED"
+  elif (( pct_int >= 60 )); then printf '%s' "$C_ORANGE"
+  elif (( pct_int >= 40 )); then printf '%s' "$C_YELLOW"
+  else                           printf '%s' "$C_GREEN"
+  fi
+}
+
+color_rate_pct() {
   local pct_int=${1:-0}
   if   (( pct_int >= 90 )); then printf '%s' "$C_RED"
-  elif (( pct_int >= 75 )); then printf '%s' "$C_ORANGE"
+  elif (( pct_int >= 80 )); then printf '%s' "$C_ORANGE"
   elif (( pct_int >= 50 )); then printf '%s' "$C_YELLOW"
   else                           printf '%s' "$C_GREEN"
   fi
@@ -107,23 +116,25 @@ fi
 
 # -- context bar --------------------------------------------------------------
 
-ctx_color=$(color_by_pct "$ctx_int")
-ctx_bar=$(gauge_bar "$ctx_int" 8 "█" "▁")
+ctx_color=$(color_ctx_pct "$ctx_int")
+ctx_bar=$(gauge_bar "$ctx_int" 8 "█" "░")
 ctx_alert=""
-(( ctx_int >= 95 )) && ctx_alert=" CRIT"
-(( ctx_int >= 90 && ctx_int < 95 )) && ctx_alert=" HIGH"
+(( ctx_int >= 75 )) && ctx_alert=" CRIT"
+(( ctx_int >= 60 && ctx_int < 75 )) && ctx_alert=" HIGH"
 
 # -- rate limits --------------------------------------------------------------
 
 format_rate() {
   local icon=$1 pct_int=$2 reset_raw=$3 time_style=${4:-short}
-  local c bar reset_str=""
-  c=$(color_by_pct "$pct_int")
+  local c bar reset_str="" alert=""
+  c=$(color_rate_pct "$pct_int")
   bar=$(gauge_bar "$pct_int")
   if [ -n "$reset_raw" ] && [ "$reset_raw" != "0" ]; then
     reset_str=" $(seconds_until "$reset_raw" "$time_style")"
   fi
-  printf '%b%s%b %b%s %d%%%b%s' "$C_ICON" "$icon" "$RST" "$c" "$bar" "$pct_int" "$RST" "$reset_str"
+  (( pct_int >= 90 )) && alert=" CRIT"
+  (( pct_int >= 80 && pct_int < 90 )) && alert=" HIGH"
+  printf '%b%s%b %b%s %d%%%b%s%s' "$C_ICON" "$icon" "$RST" "$c" "$bar" "$pct_int" "$RST" "$reset_str" "$alert"
 }
 
 rl5_str=$(format_rate "$ICO_5H" "$rl5_int" "$rl5_reset")
@@ -131,13 +142,11 @@ rl7_str=$(format_rate "$ICO_7D" "$rl7_int" "$rl7_reset" "days")
 
 # -- assemble -----------------------------------------------------------------
 
-sep=" ${C_SEP}|${RST} "
-
 line1="${BG_MODEL}${C_MODEL} ${ICO_MODEL} ${model} ${RST}"
 line1+=" ${C_DIR}${ICO_DIR} ${dir_display}${RST}"
-line1+="${sep}${C_ICON}${ICO_CTX}${RST} ${ctx_color}${ctx_bar} ${ctx_int}%${RST}${ctx_alert}"
+line1+=" ${C_ICON}${ICO_CTX}${RST} ${ctx_color}${ctx_bar} ${ctx_int}%${RST}${ctx_alert}"
 
-line2="${rl5_str}"
-line2+="${sep}${rl7_str}"
+line2="${RST} ${rl5_str}"
+line2+=" ${rl7_str}"
 
 printf '%b\n%b\n' "$line1" "$line2"
