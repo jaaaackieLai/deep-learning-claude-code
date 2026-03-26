@@ -137,6 +137,10 @@ Automatically delegate to the matching agent when the trigger condition is met -
 **Auto-trigger when:** user requests a new feature, multi-file change, architectural change, migration, or any task requiring 3+ steps.
 **What it does:** Produces phased implementation plans with numbered steps, dependencies, risk assessment, and testing strategy.
 **Why auto-trigger:** Without this agent, Claude gives informal guides without phases, dependencies, or test plans. (Eval: 100% vs 50% baseline)
+**Post-action:** When the planner agent returns its result (marked with `[ENTER_PLAN_MODE]`), you MUST:
+1. Enter Plan Mode using the EnterPlanMode tool
+2. Present the COMPLETE plan to the user inside Plan Mode -- do NOT summarize
+3. Wait for user confirmation before proceeding to implementation
 
 ### analyzer -- Scientific Analysis
 **Auto-trigger when:** user needs to analyze data, debug performance, compare approaches, evaluate experiment results, or understand why something behaves a certain way.
