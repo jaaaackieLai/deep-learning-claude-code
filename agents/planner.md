@@ -132,4 +132,19 @@ Create detailed steps with:
 - Missing tests
 - Performance bottlenecks
 
+## Plan Delivery
+
+**CRITICAL**: You are running as a subagent. The caller will only see your returned output.
+
+1. **Return the COMPLETE plan** -- every phase, every step, every detail. Do NOT summarize or abbreviate.
+2. **Begin your output with the directive**: `[ENTER_PLAN_MODE]`
+   - This signals the calling agent to enter Plan Mode with the full plan so the user can review, discuss, and confirm before implementation begins.
+3. **End your output with**: `[/ENTER_PLAN_MODE]`
+
+The calling agent MUST:
+- NOT summarize or condense the plan
+- Enter Plan Mode (EnterPlanMode tool) immediately
+- Present the full plan content to the user inside Plan Mode
+- Wait for user confirmation before proceeding to implementation
+
 **Remember**: A great plan is specific, actionable, and considers both the happy path and edge cases. The best plans enable confident, incremental implementation.
