@@ -46,6 +46,8 @@ Slash commands for common workflows:
 | `/test-coverage` | Analyze coverage and generate missing tests |
 | `/update-codemaps` | Scan codebase and update architecture docs |
 | `/update-docs` | Sync documentation from source-of-truth |
+| `/commit` | Analyze uncommitted changes and create small, focused commits grouped by functionality |
+| `/merge-worktree` | Merge the current worktree branch into main and clean up |
 
 See [Command Guide](docs/en/command-readme.md) for details.
 
@@ -59,28 +61,58 @@ Extend Claude's capabilities with specialized knowledge:
 | **software-brainstorming** | Structured brainstorming for software architecture and feature planning |
 | **paper** | Transform research papers and code repos into reusable skill references via multi-agent council |
 | **continuous-learning** | Real-time misunderstanding detection and communication optimization |
+| **autoresearch** | Autonomous experiment loop: modify code, train, evaluate, keep/discard, repeat indefinitely |
 
 See [Skill Guide](docs/en/skill-readme.md) for details.
 
-### Status Line
+### Rules
 
-A custom status line script (`claude-settings/statusline.sh`) that displays real-time session info:
+Reusable rule files for consistent code style. Copy them to your project's `rules/` directory or `~/.claude/rules/` for global use.
 
-```
-[Opus 4.6] my-project | Context ███▁▁▁▁▁ 42% | 5h ▁▁▁▁▁▁▁▁ 12% 3h01m | 7d ▁▁▁▁▁▁▁▁ 5% 2d1h
-```
-
-**What it shows:** model name, working directory, context window usage bar, 5-hour/7-day rate limits with progress bars and reset timers.
+| Rule | Purpose |
+|------|---------|
+| **coding-style** | Python coding conventions for deep learning projects: GPU setup, type hints, `match` statements, `tqdm` progress bars, Ray Tune subprocess pattern, etc. |
+| **comment-style** | Comment guidelines based on "comment why, not what": function docs, design comments, why comments, teacher comments, and anti-patterns to avoid |
 
 **Setup:**
 
-1. Copy the script to your Claude config directory:
+```bash
+# Project-level (applies to one project)
+cp rules/*.md /path/to/your-project/rules/
+
+# User-level (applies to all projects)
+cp rules/*.md ~/.claude/rules/
+```
+
+### Claude Settings
+
+Template CLAUDE.md files and a status line script. Copy and customize for your own setup.
+
+| File | Purpose |
+|------|---------|
+| **user-CLAUDE.md** | User-level `~/.claude/CLAUDE.md` template: TDD cycle, Tidy First, commit rules, agent auto-dispatch, code quality standards |
+| **project-CLAUDE.md** | Project-level `CLAUDE.md` template: project structure, code style, testing, security, git workflow |
+| **statusline.sh** | Custom status line showing model, context usage, and rate limit bars |
+
+**CLAUDE.md setup:**
+
+```bash
+# User-level (global instructions for all projects)
+cp claude-settings/user-CLAUDE.md ~/.claude/CLAUDE.md
+
+# Project-level (edit to fit your project)
+cp claude-settings/project-CLAUDE.md /path/to/your-project/CLAUDE.md
+```
+
+**Status line setup:**
+
+1. Copy the script:
    ```bash
    cp claude-settings/statusline.sh ~/.claude/statusline.sh
    chmod +x ~/.claude/statusline.sh
    ```
 
-2. Add to your `~/.claude/settings.json`:
+2. Add to `~/.claude/settings.json`:
    ```json
    {
      "statusLine": {

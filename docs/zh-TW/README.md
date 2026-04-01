@@ -46,6 +46,8 @@ claude plugin add jaaaackieLai/deep-learning-claude-code
 | `/test-coverage` | 分析覆蓋率並生成缺失的測試 |
 | `/update-codemaps` | 掃描程式碼庫並更新架構文件 |
 | `/update-docs` | 從真實來源同步文件 |
+| `/commit` | 分析未提交的變更，按功能分組建立小而聚焦的 commit |
+| `/merge-worktree` | 將當前 worktree 分支合併至 main 並清理 |
 
 詳見[命令指南](./command-readme.md)。
 
@@ -59,8 +61,68 @@ claude plugin add jaaaackieLai/deep-learning-claude-code
 | **software-brainstorming** | 軟體架構和功能規劃的結構化腦力激盪 |
 | **paper** | 透過多代理 council 將研究論文和程式碼倉庫轉化為可重用的技能參考 |
 | **continuous-learning** | 即時誤解檢測和溝通優化 |
+| **autoresearch** | 自主實驗迴圈：修改程式碼、訓練、評估、保留/捨棄，無限重複 |
 
 詳見[技能指南](./skill-readme.md)。
+
+### 規則 (Rules)
+
+可重用的程式碼風格規則檔。複製到專案的 `rules/` 目錄或 `~/.claude/rules/` 作為全域規則。
+
+| 規則 | 用途 |
+|------|------|
+| **coding-style** | 深度學習專案的 Python 程式碼規範：GPU 設定、型別提示、`match` 語句、`tqdm` 進度條、Ray Tune subprocess 模式等 |
+| **comment-style** | 註解撰寫規範，基於「註解 why 而非 what」：函數文件、設計註解、原因註解、教學註解，以及應避免的反模式 |
+
+**設定方式：**
+
+```bash
+# 專案層級（僅套用於單一專案）
+cp rules/*.md /path/to/your-project/rules/
+
+# 使用者層級（套用於所有專案）
+cp rules/*.md ~/.claude/rules/
+```
+
+### Claude 設定 (Claude Settings)
+
+CLAUDE.md 範本檔與狀態列腳本。複製後依需求自行調整。
+
+| 檔案 | 用途 |
+|------|------|
+| **user-CLAUDE.md** | 使用者層級 `~/.claude/CLAUDE.md` 範本：TDD 循環、Tidy First、commit 規則、agent 自動派遣、程式碼品質標準 |
+| **project-CLAUDE.md** | 專案層級 `CLAUDE.md` 範本：專案結構、程式碼風格、測試、安全、git 工作流 |
+| **statusline.sh** | 自訂狀態列，顯示模型、context 使用量、速率限制進度條 |
+
+**CLAUDE.md 設定方式：**
+
+```bash
+# 使用者層級（所有專案的全域指引）
+cp claude-settings/user-CLAUDE.md ~/.claude/CLAUDE.md
+
+# 專案層級（依專案需求編輯）
+cp claude-settings/project-CLAUDE.md /path/to/your-project/CLAUDE.md
+```
+
+**狀態列設定方式：**
+
+1. 複製腳本：
+   ```bash
+   cp claude-settings/statusline.sh ~/.claude/statusline.sh
+   chmod +x ~/.claude/statusline.sh
+   ```
+
+2. 加入 `~/.claude/settings.json`：
+   ```json
+   {
+     "statusLine": {
+       "type": "command",
+       "command": "bash ~/.claude/statusline.sh"
+     }
+   }
+   ```
+
+**需求：** `bash`、`jq`
 
 ## 建議添加 Anthropic 官方技能
 
