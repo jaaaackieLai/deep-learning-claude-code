@@ -84,6 +84,26 @@
         ]
       },
       "strict": false
+    },
+    {
+      "name": "git-workflow",
+      "source": "./",
+      "description": "Git workflow commands: smart multi-commit from uncommitted changes, and worktree branch merge with cleanup",
+      "version": "1.0.0",
+      "category": "productivity",
+      "commands": [
+        "./commands/commit.md",
+        "./commands/merge-worktree.md"
+      ],
+      "strict": false
+    },
+    {
+      "name": "autoresearch-skill",
+      "source": "./skills/autoresearch",
+      "description": "Autonomous deep learning experimentation: modify code, train with fixed time budget, evaluate against a single metric, keep or discard, loop indefinitely until manually stopped",
+      "version": "1.0.0",
+      "category": "research",
+      "strict": false
     }
   ]
 }
