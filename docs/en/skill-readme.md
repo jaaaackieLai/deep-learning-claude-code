@@ -152,12 +152,53 @@ The skill uses a 5-phase council deliberation process:
 
 ---
 
+## autoresearch
+
+**Purpose**: Run autonomous deep learning experiments in a loop -- modify code, train, evaluate, keep or discard, repeat indefinitely
+
+**Use Cases**:
+- Overnight autonomous hyperparameter/architecture search
+- Iterating on model design with a fixed compute budget
+- Any deep learning experiment loop where one metric determines success
+- Letting the agent run experiments while you sleep
+
+**How It Works**:
+
+The skill implements an autonomous experiment loop inspired by [karpathy/autoresearch](https://github.com/karpathy/autoresearch):
+
+1. **Setup**: Agree on scope (target file, metric, time budget), create experiment branch, run baseline
+2. **Loop Forever**:
+   - Modify the target file with an experimental idea
+   - Git commit the change
+   - Run the experiment (fixed time budget, e.g., 5 minutes)
+   - Extract the metric from the log
+   - **Keep** if improved (advance the branch), **Discard** if not (git reset)
+   - Log results to `results.tsv`
+   - Repeat indefinitely until manually stopped
+3. **Analysis**: Post-session Jupyter notebook for visualizing progress, outcome distribution, and top hits
+
+**Core Design Principles**:
+- **Single file to modify**: Agent edits exactly one file, everything else is read-only
+- **Fixed time budget**: Every experiment runs for the same wall-clock duration for fair comparison
+- **Single metric**: One scalar decides keep or discard -- no multi-objective balancing
+- **Simplicity criterion**: Simpler code with equal performance is a win
+- **Never stop**: The agent runs indefinitely until the user interrupts
+
+**Structure**:
+- `SKILL.md` - Main skill definition and workflow
+- `references/experiment-protocol.md` - Detailed experiment loop with crash handling and decision rules
+- `references/analysis-template.md` - Jupyter notebook template for post-session analysis
+
+**Target Users**: Deep learning researchers running iterative experiments
+
+---
+
 ## Summary Table
 
 | Skill Category | Skills | Status | Target Audience |
 |----------------|--------|--------|-----------------|
 | **Brainstorming** | scientific-brainstorming, software-brainstorming | Available | Developers, researchers |
-| **Research** | paper | Available | Deep learning researchers |
+| **Research** | paper, autoresearch | Available | Deep learning researchers |
 | **Learning** | continuous-learning | Available | All users |
 
 ---
@@ -168,8 +209,9 @@ The skill uses a 5-phase council deliberation process:
 
 **Recommended Skills**:
 1. **paper** - Transform papers and code repos into reusable skill references
-2. **scientific-brainstorming** - For generating research hypotheses and experimental ideas
-3. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
+2. **autoresearch** - Run autonomous experiments overnight while you sleep
+3. **scientific-brainstorming** - For generating research hypotheses and experimental ideas
+4. **continuous-learning** - Reduce communication misunderstandings, improve collaboration efficiency
 
 ### For Software Developers
 
