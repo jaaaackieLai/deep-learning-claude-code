@@ -120,6 +120,51 @@
 
 ---
 
+## /commit
+
+**用途**：分析所有未提交的變更，按功能分組建立小而聚焦的 commit
+
+**使用時機**：
+- 完成涉及多個檔案的工作後
+- 想要乾淨、有組織的 commit 歷史時
+- 取代單一龐大的「WIP」commit
+
+**執行流程**：
+1. 調查所有變更（已暫存、未暫存、未追蹤）
+2. 按類型分類為 commit 群組（docs、feat、fix、refactor、test、chore、style）
+3. 呈現編號計畫表
+4. 依序執行 commit，使用 conventional commit 格式
+5. 顯示最終 git log
+
+**注意事項**：
+- 遵循 Tidy First：標註混合的結構性/行為性變更，但不拆分單一檔案的 diff
+- 絕不使用 `git add -A` -- 只加入特定檔案
+- 對可能包含 secrets 的檔案發出警告
+
+---
+
+## /merge-worktree
+
+**用途**：將當前 worktree 分支合併至 main 並清理
+
+**使用時機**：
+- 在 git worktree 完成工作後
+- 準備將 worktree 分支整合回 main 時
+
+**執行流程**：
+1. 確認處於 worktree 中（非 main working tree）
+2. 提交未 commit 的變更（需要時呼叫 `/commit`）
+3. 顯示待合併的 commit，請求確認
+4. 以 `--no-ff` 合併至 main
+5. 移除 worktree 並刪除分支
+6. 報告最終狀態
+
+**注意事項**：
+- 發生合併衝突時停止並報告（不強制解決）
+- 有未追蹤檔案時會詢問是否強制移除 worktree
+
+---
+
 ## 建議工作流程
 
 功能開發時，按以下順序組合命令：
@@ -128,3 +173,4 @@
 2. `/tdd` - 以測試優先的方法實作
 3. `/test-coverage` - 驗證覆蓋率達到門檻
 4. `/update-docs` - 保持文件同步
+5. `/commit` - 建立乾淨、聚焦的 commit

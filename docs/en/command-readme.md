@@ -120,6 +120,51 @@ Commands are slash-invoked workflows that trigger specific agents or processes. 
 
 ---
 
+## /commit
+
+**Purpose**: Analyze all uncommitted changes and create small, focused commits grouped by functionality
+
+**When to use**:
+- After completing work that touches multiple files
+- When you want clean, well-organized commit history
+- Instead of a single large "WIP" commit
+
+**What happens**:
+1. Surveys all changes (staged, unstaged, untracked)
+2. Classifies changes into commit groups by type (docs, feat, fix, refactor, test, chore, style)
+3. Presents a numbered plan table
+4. Executes commits in order with conventional commit messages
+5. Shows final git log
+
+**Notes**:
+- Follows Tidy First: notes mixed structural/behavioral changes but does not split a single file's diff
+- Never uses `git add -A` -- adds specific files only
+- Warns about files that may contain secrets
+
+---
+
+## /merge-worktree
+
+**Purpose**: Merge the current worktree branch into main and clean up
+
+**When to use**:
+- After finishing work in a git worktree
+- When ready to integrate a worktree branch back into main
+
+**What happens**:
+1. Verifies you are in a worktree (not main working tree)
+2. Commits any uncommitted changes (invokes `/commit` if needed)
+3. Shows commits to be merged, asks for confirmation
+4. Merges into main with `--no-ff`
+5. Removes the worktree and deletes the branch
+6. Reports final status
+
+**Notes**:
+- Stops and reports if merge conflicts occur (does not force-resolve)
+- Asks before force-removing worktrees with untracked files
+
+---
+
 ## Recommended Workflow
 
 For feature development, combine commands in this order:
@@ -128,3 +173,4 @@ For feature development, combine commands in this order:
 2. `/tdd` - Implement with test-first methodology
 3. `/test-coverage` - Verify coverage meets threshold
 4. `/update-docs` - Keep documentation current
+5. `/commit` - Create clean, focused commits
