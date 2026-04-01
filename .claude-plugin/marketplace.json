@@ -87,7 +87,7 @@
     },
     {
       "name": "git-workflow",
-      "source": "./",
+      "source": "./git-workflow",
       "description": "Git workflow commands: smart multi-commit from uncommitted changes, and worktree branch merge with cleanup",
       "version": "1.0.0",
       "category": "productivity",
